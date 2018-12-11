@@ -21,6 +21,62 @@ include the usbserial package at the top of your dart file.
 import 'package:usbserial/usbserial.dart'
 ```
 
+Edit app\build.gradle and add 
+
+```
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+```
+
+to the 'android' object.
+
+### Optional
+
+Add 
+```xml
+	<intent-filter>
+		<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+	</intent-filter>
+
+	<meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+		android:resource="@xml/device_filter" />
+```
+to your AndroidManifest.xml
+
+and place device_filter.xml 
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 0x0403 / 0x6001: FTDI FT232R UART -->
+    <usb-device vendor-id="1027" product-id="24577" />
+    
+    <!-- 0x0403 / 0x6015: FTDI FT231X -->
+    <usb-device vendor-id="1027" product-id="24597" />
+
+    <!-- 0x2341 / Arduino -->
+    <usb-device vendor-id="9025" />
+
+    <!-- 0x16C0 / 0x0483: Teensyduino  -->
+    <usb-device vendor-id="5824" product-id="1155" />
+
+    <!-- 0x10C4 / 0xEA60: CP210x UART Bridge -->
+    <usb-device vendor-id="4292" product-id="60000" />
+    
+    <!-- 0x067B / 0x2303: Prolific PL2303 -->
+    <usb-device vendor-id="1659" product-id="8963" />
+    
+    <!-- 0x1366 / 0x0105: Segger JLink -->
+    <usb-device vendor-id="4966" product-id="261" />
+    
+</resources>
+```
+
+in the res/xml directory. This will notify your app when one of the specified devices
+is plugged in.
+
 ## Usage
 
 ```dart
