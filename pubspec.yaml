@@ -1,8 +1,8 @@
 name: usb_serial
-description: A USB Serial Flutter Plugin
+description: This plugin will allow you to easily use the USB uart hardware based on FTDI or CDC (and more!) protocols.
 version: 0.0.1
-author:
-homepage:
+author: Ron Bessems <rbessems@gmail.com>
+homepage: https://github.com/altera2015/usbserial
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
