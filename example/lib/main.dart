@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
       print("Usb Event $event");
       setState(() {
         _lastEvent = event;
-      })
+      });
     });
   }
 

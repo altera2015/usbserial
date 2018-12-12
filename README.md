@@ -12,7 +12,7 @@ Add a dependency to your pubspec.yaml
 
 ```dart
 dependencies:
-	usbserial: ^0.0.1
+	usb_serial: ^0.0.1
 ```
 
 include the usbserial package at the top of your dart file.

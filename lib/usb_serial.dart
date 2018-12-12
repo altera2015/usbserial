@@ -164,15 +164,15 @@ class UsbDevice {
 /// UsbSerial is the main entry point into this class and can
 /// create UsbPorts or list devices.
 class UsbSerial {
-  /// CDC class constant. Very common USB to UART bridge type.
+  /// CDC class constant. Very common USB to UART bridge type. Used by [create]
   static const String CDC = "cdc";
-  /// CH34X hardware type.
+  /// CH34X hardware type. Used by [create]
   static const String CH34x = "ch34x";
-  /// CP210x hardware type.
+  /// CP210x hardware type. Used by [create]
   static const String CP210x = "cp210x";
-  /// FTDI Hardware USB to Uart bridge. (Very common)
+  /// FTDI Hardware USB to Uart bridge. (Very common) Used by [create]
   static const String FTDI = "ftdi";
-  /// PL2303 Hardware USB to Uart bridge. (Fairly common)
+  /// PL2303 Hardware USB to Uart bridge. (Fairly common) Used by [create]
   static const String PL2303 = "pl2303";
 
   static const MethodChannel _channel = const MethodChannel('usb_serial');
@@ -181,6 +181,21 @@ class UsbSerial {
   static Stream<String> _eventStream;
 
   /// Use this stream to detect if a USB device is plugged in or removed.
+  ///
+  /// Example
+  /// ```dart
+  /// @override
+  /// void initState() {
+  ///   super.initState();
+  ///
+  ///   UsbSerial.usbEventStream.listen((String event) {
+  ///     print("Usb Event $event");
+  ///     setState(() {
+  ///       _lastEvent = event;
+  ///     });
+  ///   });
+  /// }
+  /// ```
   static Stream<String> get usbEventStream {
     if (_eventStream == null) {
       _eventStream =
@@ -192,6 +207,16 @@ class UsbSerial {
   /// Creates a UsbPort from vid, pid and optionally type and interface.
   /// throws an error on failure. This function will pop up a permission
   /// request if needed.
+  ///
+  /// [vid] = Vendor Id
+  /// [pid] = Product Id
+  /// [type] = One of [UserSerial.CDC], [UsbSerial.CH34x], [UsbSerial.CP210x], [UsbSerial.FTDI], [UsbSerial.PL2303] or empty for auto detect.
+  /// [interface] = Interface of the Usb Interface, -1 for auto detect.
+  ///
+  /// Example for a fake device with VID 0x1000 and PID 0x2000
+  /// ```dart
+  /// UsbPort port = await UsbSerial.create(0x1000, 0x2000);
+  /// ```
   static Future<UsbPort> create(int vid, int pid,
       [String type = "", int interface = -1]) async {
     String methodChannelName = await _channel.invokeMethod("create", {
@@ -214,6 +239,9 @@ class UsbSerial {
   /// request if needed. Note deviceId is only valid for the duration
   /// of a device being plugged in. Once unplugged and replugged this
   /// id changes.
+  ///
+  /// [type] = One of [UserSerial.CDC], [UsbSerial.CH34x], [UsbSerial.CP210x], [UsbSerial.FTDI], [UsbSerial.PL2303] or empty for auto detect.
+  /// [interface] = Interface of the Usb Interface, -1 for auto detect.
   static Future<UsbPort> createFromDeviceId(int deviceId,
       [String type = "", int interface = -1]) async {
     String methodChannelName = await _channel.invokeMethod("create", {
