@@ -1,4 +1,4 @@
-[![Pub](https://img.shields.io/pub/v/usbserial.svg)](https://pub.dartlang.org/packages/usbserial)
+[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial)
 
 # usb_serial
 
@@ -18,7 +18,7 @@ dependencies:
 include the usbserial package at the top of your dart file.
 
 ```dart
-import 'package:usbserial/usbserial.dart'
+import 'package:usb_serial/usb_serial.dart'
 ```
 
 Edit app\build.gradle and add 
