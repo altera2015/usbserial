@@ -49,9 +49,13 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         public void onReceive(Context arg0, Intent arg1) {
             if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
                 Log.d(TAG, "ACTION_USB_ATTACHED");
-                m_EventSink.success(ACTION_USB_ATTACHED);
+                if ( m_EventSink != null ) {
+                    m_EventSink.success(ACTION_USB_ATTACHED);
+                }
             } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                m_EventSink.success(ACTION_USB_DETACHED);
+                if ( m_EventSink != null ) {
+                    m_EventSink.success(ACTION_USB_DETACHED);
+                }
                 Log.d(TAG, "ACTION_USB_DETACHED");
             }
         }

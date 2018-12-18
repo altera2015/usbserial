@@ -12,7 +12,7 @@ Add a dependency to your pubspec.yaml
 
 ```dart
 dependencies:
-	usb_serial: ^0.0.1
+	usb_serial: ^0.0.2
 ```
 
 include the usbserial package at the top of your dart file.
@@ -21,7 +21,9 @@ include the usbserial package at the top of your dart file.
 import 'package:usb_serial/usb_serial.dart'
 ```
 
-Edit app\build.gradle and add 
+### IMPORTANT app\build.gradle
+
+Edit android\app\build.gradle and add 
 
 ```
     compileOptions {
@@ -30,7 +32,9 @@ Edit app\build.gradle and add
     }
 ```
 
-to the 'android' object.
+to the 'android' object, see [build.grade](https://raw.githubusercontent.com/altera2015/usbserial/master/example/android/app/build.gradle) 
+from the example project for a template on how to do this. Without this you'll get a bunch or Java 
+errors.
 
 ### Optional
 
