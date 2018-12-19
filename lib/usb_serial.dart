@@ -1,41 +1,86 @@
 import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
+
+/// Created when a USB event occurs. For example a USB device is plugged
+/// in or removed.
+///
+/// Example:
+/// ```dart
+/// UsbSerial.usbEventStream.listen((UsbEvent msg) {
+///   print(msg);
+///   if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
+///     // open a device now...
+///   }
+///   if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
+///     //  close device now...
+///   }
+/// });
+/// ```
+class UsbEvent {
+  /// Event passed to usbEventStream when a USB device is attached.
+  static const String ACTION_USB_ATTACHED =
+      "android.hardware.usb.action.USB_DEVICE_ATTACHED";
+
+  /// Event passed to usbEventStream when a USB device is detached.
+  static const String ACTION_USB_DETACHED =
+      "android.hardware.usb.action.USB_DEVICE_DETACHED";
+
+  /// either ACTION_USB_ATTACHED or ACTION_USB_DETACHED
+  String event;
+
+  /// The device for which the event was fired.
+  UsbDevice device;
+
+  String toString() {
+    return "UsbEvent: $event, $device";
+  }
+}
 
 /// UsbPort handles the communication with the USB Serial port.
 class UsbPort {
   /// Constant to configure port with 5 databits.
   static const int DATABITS_5 = 5;
+
   /// Constant to configure port with 6 databits.
   static const int DATABITS_6 = 6;
+
   /// Constant to configure port with 7 databits.
   static const int DATABITS_7 = 7;
+
   /// Constant to configure port with 8 databits.
   static const int DATABITS_8 = 8;
 
   /// Constant to configure port with no flow control
   static const int FLOW_CONTROL_OFF = 0;
+
   /// Constant to configure port with flow control RTS/CTS
   static const int FLOW_CONTROL_RTS_CTS = 1;
+
   /// Constant to configure port with flow contorl DSR / DTR
   static const int FLOW_CONTROL_DSR_DTR = 2;
+
   /// Constant to configure port with flow control XON XOFF
   static const int FLOW_CONTROL_XON_XOFF = 3;
 
   /// Constant to configure port with parity none
   static const int PARITY_NONE = 0;
+
   /// Constant to configure port with odd parity.
   static const int PARITY_ODD = 1;
+
   /// Constant to configure port with mark parity.
   static const int PARITY_MARK = 3;
+
   /// Constant to configure port with space parity.
   static const int PARITY_SPACE = 4;
 
   /// Constant to configure port with 1 stop bits
   static const int STOPBITS_1 = 1;
+
   /// Constant to configure port with 1.5 stop bits
   static const int STOPBITS_1_5 = 3;
+
   /// Constant to configure port with 2 stop bits
   static const int STOPBITS_2 = 2;
 
@@ -129,13 +174,16 @@ class UsbPort {
 class UsbDevice {
   /// Vendor Id
   final int vid;
+
   /// Product Id
   final int pid;
   final String productName;
   final String manufacturerName;
+
   /// The device id is unique to this Usb Device until it is unplugged.
   /// when replugged this ID will be different.
   final int deviceId;
+
   /// The Serial number from the USB device.
   final String serial;
 
@@ -166,19 +214,23 @@ class UsbDevice {
 class UsbSerial {
   /// CDC class constant. Very common USB to UART bridge type. Used by [create]
   static const String CDC = "cdc";
+
   /// CH34X hardware type. Used by [create]
   static const String CH34x = "ch34x";
+
   /// CP210x hardware type. Used by [create]
   static const String CP210x = "cp210x";
+
   /// FTDI Hardware USB to Uart bridge. (Very common) Used by [create]
   static const String FTDI = "ftdi";
+
   /// PL2303 Hardware USB to Uart bridge. (Fairly common) Used by [create]
   static const String PL2303 = "pl2303";
 
   static const MethodChannel _channel = const MethodChannel('usb_serial');
   static const EventChannel _eventChannel =
       const EventChannel('usb_serial/usb_events');
-  static Stream<String> _eventStream;
+  static Stream<UsbEvent> _eventStream;
 
   /// Use this stream to detect if a USB device is plugged in or removed.
   ///
@@ -196,10 +248,15 @@ class UsbSerial {
   ///   });
   /// }
   /// ```
-  static Stream<String> get usbEventStream {
+  static Stream<UsbEvent> get usbEventStream {
     if (_eventStream == null) {
       _eventStream =
-          _eventChannel.receiveBroadcastStream().map<String>((value) => value);
+          _eventChannel.receiveBroadcastStream().map<UsbEvent>((value) {
+        UsbEvent msg = UsbEvent();
+        msg.device = UsbDevice.fromJSON(value);
+        msg.event = value["event"];
+        return msg;
+      });
     }
     return _eventStream;
   }

@@ -1,3 +1,9 @@
+## 0.1.0
+
+* Modified the USB Attached/Detach stream from Stream<String> to Stream<UsbEvent> to 
+  carry additional information about the device being added or removed. 
+* Added ACTION_USB_ATTACHED and ACTION_USB_DETACHED constants to dart interface.
+
 ## 0.0.2
 
 * Fixed crasher when connected or disconnecting a USB device without having 

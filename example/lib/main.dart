@@ -18,15 +18,13 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    UsbSerial.usbEventStream.listen((String event) {
+    UsbSerial.usbEventStream.listen((UsbEvent event) {
       print("Usb Event $event");
       setState(() {
-        _lastEvent = event;
+        _lastEvent = event.toString();
       });
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {

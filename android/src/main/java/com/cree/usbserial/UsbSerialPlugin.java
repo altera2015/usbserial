@@ -46,17 +46,23 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         @Override
-        public void onReceive(Context arg0, Intent arg1) {
-            if (arg1.getAction().equals(ACTION_USB_ATTACHED)) {
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(ACTION_USB_ATTACHED)) {
                 Log.d(TAG, "ACTION_USB_ATTACHED");
                 if ( m_EventSink != null ) {
-                    m_EventSink.success(ACTION_USB_ATTACHED);
+                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    HashMap<String, Object> msg = serializeDevice(device);
+                    msg.put("event", ACTION_USB_ATTACHED);
+                    m_EventSink.success(msg);
                 }
-            } else if (arg1.getAction().equals(ACTION_USB_DETACHED)) {
-                if ( m_EventSink != null ) {
-                    m_EventSink.success(ACTION_USB_DETACHED);
-                }
+            } else if (intent.getAction().equals(ACTION_USB_DETACHED)) {
                 Log.d(TAG, "ACTION_USB_DETACHED");
+                if ( m_EventSink != null ) {
+                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    HashMap<String, Object> msg = serializeDevice(device);
+                    msg.put("event", ACTION_USB_DETACHED);
+                    m_EventSink.success(msg);
+                }
             }
         }
     };
@@ -189,6 +195,17 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         result.error(TAG, "No such device", null);
     }
 
+    private HashMap<String, Object> serializeDevice(UsbDevice device) {
+        HashMap<String, Object> dev = new HashMap<>();
+        dev.put("vid", device.getVendorId());
+        dev.put("pid", device.getProductId());
+        dev.put("manufacturerName", device.getManufacturerName());
+        dev.put("productName", device.getProductName());
+        dev.put("serialNumber", device.getSerialNumber());
+        dev.put("deviceId", device.getDeviceId());
+        return dev;
+    }
+
     private void listDevices(Result result) {
         Map<String, UsbDevice> devices = m_Manager.getDeviceList();
         if ( devices == null ) {
@@ -198,14 +215,7 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         List<HashMap<String, Object>> transferDevices = new ArrayList<>();
 
         for (UsbDevice device : devices.values()) {
-            HashMap<String, Object> dev = new HashMap<>();
-            dev.put("vid", device.getVendorId());
-            dev.put("pid", device.getProductId());
-            dev.put("manufacturerName", device.getManufacturerName());
-            dev.put("productName", device.getProductName());
-            dev.put("serialNumber", device.getSerialNumber());
-            dev.put("deviceId", device.getDeviceId());
-            transferDevices.add(dev);
+            transferDevices.add(serializeDevice(device));
         }
         result.success(transferDevices);
     }
