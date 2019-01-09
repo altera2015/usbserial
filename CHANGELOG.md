@@ -1,3 +1,8 @@
+## 0.1.1
+
+* Merged pull request 1: Fix for NoSuchMethodException thrown on api level less than 21 
+  during device enumeration. 
+
 ## 0.1.0
 
 * Modified the USB Attached/Detach stream from Stream<String> to Stream<UsbEvent> to 

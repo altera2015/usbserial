@@ -1,6 +1,6 @@
 name: usb_serial
 description: This plugin will allow you to easily use the USB uart hardware based on FTDI or CDC (and more!) protocols.
-version: 0.1.0
+version: 0.1.1
 author: Ron Bessems <rbessems@gmail.com>
 homepage: https://github.com/altera2015/usbserial
 
