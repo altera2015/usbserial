@@ -199,9 +199,11 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         HashMap<String, Object> dev = new HashMap<>();
         dev.put("vid", device.getVendorId());
         dev.put("pid", device.getProductId());
-        dev.put("manufacturerName", device.getManufacturerName());
-        dev.put("productName", device.getProductName());
-        dev.put("serialNumber", device.getSerialNumber());
+        if (android.os.Build.VERSION.SDK_INT >= 21) {
+            dev.put("manufacturerName", device.getManufacturerName());
+            dev.put("productName", device.getProductName());
+            dev.put("serialNumber", device.getSerialNumber());
+        }
         dev.put("deviceId", device.getDeviceId());
         return dev;
     }
