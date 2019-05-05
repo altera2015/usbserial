@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
+import 'types.dart';
 
 /// Created when a USB event occurs. For example a USB device is plugged
 /// in or removed.
@@ -38,7 +39,7 @@ class UsbEvent {
 }
 
 /// UsbPort handles the communication with the USB Serial port.
-class UsbPort {
+class UsbPort implements AsyncDataSinkSource {
   /// Constant to configure port with 5 databits.
   static const int DATABITS_5 = 5;
 

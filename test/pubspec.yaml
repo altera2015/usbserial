@@ -1,0 +1,4 @@
+name: tester
+dependencies:
+  async: any
+  test: any
