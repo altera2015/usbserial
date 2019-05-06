@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'types.dart';
+import '../lib/types.dart';
+import '../lib/transaction.dart';
 
 /// Test harnass stub for UsbPort.
 /// Sends the data back with a delay.
-class EchoPort implements AsyncDataSinkSource {
+class EchoPort extends AsyncDataSinkSource {
   Stream<Uint8List> _stream;
   StreamController<Uint8List> _controller;
   bool _running = false;

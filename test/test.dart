@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'transaction.dart';
+import '../lib/transaction.dart';
 import 'echo_port.dart';
 
 

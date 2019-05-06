@@ -7,4 +7,4 @@ abstract class AsyncDataSinkSource {
 }
 
 abstract class Uint8ListTransformer
-    implements StreamTransformer<Uint8List, Uint8List> {}
+    implements StreamTransformer<Uint8List, Uint8List>{}
