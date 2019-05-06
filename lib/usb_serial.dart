@@ -39,7 +39,7 @@ class UsbEvent {
 }
 
 /// UsbPort handles the communication with the USB Serial port.
-class UsbPort implements AsyncDataSinkSource {
+class UsbPort extends AsyncDataSinkSource {
   /// Constant to configure port with 5 databits.
   static const int DATABITS_5 = 5;
 

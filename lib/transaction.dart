@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'types.dart';
-import 'terminated_transformer.dart';
+import 'transformers.dart';
 
 /// The transaction class is an easy way to 
 /// use the UsbPort class in a more linear way
@@ -33,14 +33,19 @@ class Transaction {
 
   /// Create a transaction that transforms the incoming stream into 
   /// events delimited by 'terminator'.
-  factory Transaction.terminated(
-      Stream<Uint8List> stream, Uint8List terminator) {
+  factory Transaction.terminated( Stream<Uint8List> stream, Uint8List terminator) {
     return Transaction(stream
         .transform(TerminatedTransformer.broadcast(terminator: terminator)));
   }
 
+  factory Transaction.magicHeader( Stream<Uint8List> stream, List<int> header) {
+    return Transaction(stream
+        .transform(MagicHeaderAndLengthByteTransformer.broadcast(header: header)));
+  }
+
   /// Create a new transaction based stream without transforming the input.
-  Transaction(this.stream) {
+  Transaction(Stream<Uint8List> stream) {
+    this.stream = stream;
     _queue = StreamQueue<Uint8List>(stream);
   }
 
@@ -69,7 +74,7 @@ class Transaction {
 
   /// Get the next message from the queue if any.
   /// Will throw error on duration expiration!
-  Future<Uint8List> getMsg(Duration duration) async {    
+  Future<Uint8List> getMsg(Duration duration) async {
     // don't use the timeout on the .next property as
     // it will eat the next incoming packet.
     // instead use hasNext and then use
@@ -93,4 +98,7 @@ class Transaction {
     // return await _queue.next.timeout(duration);
     return getMsg(duration);    
   }
+
+  void dispose() {}
 }
+
