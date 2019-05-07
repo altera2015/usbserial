@@ -20,9 +20,9 @@ import 'transformers.dart';
 /// 
 /// var request_1 = Uint8List.fromList([65, 10, 13]);
 /// // Wait two seconds for the answer
-/// try {
-///    Uint8List response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
-/// } catch ( e ) {
+/// 
+/// Uint8List response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
+/// if (response_1 == null ) {
 ///    print("Failed to get a response.");
 /// }
 /// ```
@@ -64,7 +64,7 @@ class Transaction {
         }
         await _queue.next;
         // consume the data and throw it away.
-      } catch (e) {
+      } on TimeoutException {
         // Timeout occured, we are done, no more data
         // available.
         return;
@@ -73,16 +73,21 @@ class Transaction {
   }
 
   /// Get the next message from the queue if any.
-  /// Will throw error on duration expiration!
+  /// returns data or null on error.
   Future<Uint8List> getMsg(Duration duration) async {
     // don't use the timeout on the .next property as
     // it will eat the next incoming packet.
     // instead use hasNext and then use
-    bool b = await _queue.hasNext.timeout(duration);
-    if ( b ) {
-      return await _queue.next;
-    } else {
-      throw TimeoutException("Port was closed.");
+    try {
+      bool b = await _queue.hasNext.timeout(duration);
+      if ( b ) {
+        return await _queue.next;
+      } else {
+        // throw TimeoutException("Port was closed.");
+        return null;
+      }
+    } on TimeoutException {
+      return null;
     }
   }
 
@@ -90,15 +95,18 @@ class Transaction {
   /// 1. Flush the incoming queue
   /// 2. Write the message
   /// 3. Await the answer for at most "duration" time.
-  /// Will throw an error if the message was not received on time.
+  /// returns List of bytes or null on timeout.
   Future<Uint8List> transaction(
       AsyncDataSinkSource port, Uint8List message, Duration duration) async {        
     await flush();    
-    port.write(message);
-    // return await _queue.next.timeout(duration);
+    port.write(message);    
     return getMsg(duration);    
   }
 
-  void dispose() {}
+  /// Call dispose when you are done with the object.
+  /// this will release the underlying stream.
+  void dispose() {
+    _queue.cancel();
+  }
 }
 

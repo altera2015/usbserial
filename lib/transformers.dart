@@ -2,6 +2,37 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'types.dart';
 
+
+/// wildcardFind searches the haystack for a copy of needle.
+/// both needle and haystack must be Lists. Needle may 
+/// contain null's, that position is then treated as a wildcard.
+int wildcardFind(dynamic needle, dynamic haystack) {    
+  final int hl = haystack.length;
+  final int nl = needle.length;    
+
+  if (nl == 0) {
+    return 0;
+  }
+
+  if (hl < nl) {
+    return -1;
+  }
+
+  for (int i = 0; i <= (hl - nl); i++) {
+    bool found = true;
+    for (int j = 0; j < nl; j++) {
+      if (needle[j] != null && ( haystack[i + j] != needle[j])) {
+        found = false;
+        break;
+      }
+    }
+    if (found) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 /// This transformer takes an incoming stream and splits it
 /// along the "terminator" marks. Great for parsing incoming
 /// serial streams that end on \r\n.
@@ -62,24 +93,15 @@ class TerminatedTransformer implements Uint8ListTransformer {
     }
     _partial.addAll(data);    
 
-    bool found = true;
-    while (((_partial.length - terminator.length) > 0) && found) {
-      for (var i = 0; i <= (_partial.length - terminator.length); i++) {
-        found = true;
-        for (var j = 0; j < terminator.length; j++) {
-          if (_partial[i + j] != terminator[j]) {
-            found = false;
-            break;
-          }
-        }
-        if (found) {
-          Uint8List message =
-              Uint8List.fromList(_partial.take(i + terminator.length).toList());          
-          _controller.add(message);
-          _partial = _partial.sublist(i + terminator.length);
-          break;
-        }
+    while (((_partial.length - terminator.length) > 0)) {
+
+      int index = wildcardFind(terminator, _partial);
+      if ( index < 0 ) {
+        break;
       }
+      Uint8List message = Uint8List.fromList(_partial.take(index + terminator.length).toList());
+      _controller.add(message);
+      _partial = _partial.sublist(index + terminator.length);
     }
   }
 
@@ -166,37 +188,9 @@ class MagicHeaderAndLengthByteTransformer implements Uint8ListTransformer {
     _subscription = null;
   }
 
-
-  int _find(List<int> needle, List<int> haystack) {
-    _dataSinceLastTick = true;
-    final int hl = haystack.length;
-    final int nl = needle.length;
-
-    if (nl == 0) {
-      return 0;
-    }
-
-    if (hl < nl) {
-      return -1;
-    }
-
-    for (int i = 0; i <= (hl - nl); i++) {
-      bool found = true;
-      for (int j = 0; j < nl; j++) {
-        if (needle[i] != null && ( haystack[i + j] != needle[j])) {
-          found = false;
-          break;
-        }
-      }
-      if (found) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
   void onData(Uint8List data) {
 
+    _dataSinceLastTick = true;
     if (_partial.length > maxLen) {
       _partial = _partial.sublist(_partial.length - maxLen);
     }
@@ -204,7 +198,7 @@ class MagicHeaderAndLengthByteTransformer implements Uint8ListTransformer {
     _partial.addAll(data);
 
     while (_partial.length > 0) {
-      int index = _find(header, _partial);
+      int index = wildcardFind(header, _partial);
       if (index < 0) {
         return;
       }
@@ -246,7 +240,9 @@ class MagicHeaderAndLengthByteTransformer implements Uint8ListTransformer {
 
   void _stopTimer() {
     _timer.cancel();
+    _timer = null;
   }
+
   void _startTimer() {
     _dataSinceLastTick = false;
     _timer = Timer.periodic(clearTimeout, this._onTimer);

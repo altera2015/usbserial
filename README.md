@@ -81,7 +81,7 @@ and place device_filter.xml
 in the res/xml directory. This will notify your app when one of the specified devices
 is plugged in.
 
-## Usage
+## Usage of Asynchronous API
 
 ```dart
 ...
@@ -117,6 +117,41 @@ onPressed: () async {
 }
 ...
 ```
+
+## Usage of transaction API
+
+This API is a layer on top of the asynchronous part of the library. It provides two
+Stream Transformers and a Transaction helper based on the StreamQueue class.
+
+1. Terminated Transformer, this splits incoming data based on a configurable end of message bytes "terminator".
+2. Magic Header + Length byte, this splits incoming data based on a configurable header ( with wildcards! ) and a length byte directly following the header.
+
+In case neither is a fit, you can use one of those Transformers to create you own that is specific 
+to the binary format you are dealing with.
+
+```dart
+	
+	...
+    var transaction = Transaction.terminated(port.inputStream, Uint8List.fromList([10,13]));
+	...
+
+    // While using transactions you can still listen to all 
+    // incoming messages!    
+    transaction.stream.listen( (Uint8List data) {
+      print(data);
+    });
+
+	// you can write asynchronous messages as before!
+    p.write(Uint8List.fromList([1,2,3,4,5,10,13]));
+    
+	// BUT you can also write 'transactions'. This is a combination of a flush, write and wait for response
+	// with a timeout. If no response is received within the timeout a null value is returned.
+    var response = await transaction.transaction(p, Uint8List.fromList([20,21,10,13]), Duration(seconds: 1) );    
+	print("The response was $response");
+    
+```
+
+Have a look at [test.dart](https://github.com/altera2015/usbserial/blob/transaction/test/test.dart) if you need more examples.
 
 ## Dependencies
 
