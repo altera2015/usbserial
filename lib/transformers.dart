@@ -36,7 +36,7 @@ int wildcardFind(dynamic needle, dynamic haystack) {
 /// This transformer takes an incoming stream and splits it
 /// along the "terminator" marks. Great for parsing incoming
 /// serial streams that end on \r\n.
-class TerminatedTransformer implements Uint8ListTransformer {
+class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
   bool cancelOnError;
   final Uint8List terminator;
   final int
@@ -116,6 +116,91 @@ class TerminatedTransformer implements Uint8ListTransformer {
 
 
 
+
+
+/// This transformer takes an incoming stream and splits it
+/// along the "terminator" marks and returns a String! Great 
+/// for parsing incoming serial streams that end on \r\n.
+class TerminatedStringTransformer implements StreamTransformer<Uint8List, String> {
+  bool cancelOnError;
+  final Uint8List terminator;
+  final int
+      maxLen; // maximum length the partial buffer will hold before it starts flushing.
+
+  StreamController _controller;
+  StreamSubscription _subscription;
+  Stream<Uint8List> _stream;
+  List<int> _partial;
+
+  TerminatedStringTransformer(
+      {bool sync: false,
+      this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024}) {
+    _partial = [];
+    _controller = new StreamController<String>(
+        onListen: _onListen,
+        onCancel: _onCancel,
+        onPause: () {
+          _subscription.pause();
+        },
+        onResume: () {
+          _subscription.resume();
+        },
+        sync: sync);
+  }
+
+  TerminatedStringTransformer.broadcast(
+      {bool sync: false,
+      bool this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024}) {
+    _partial = [];
+    _controller = new StreamController<String>.broadcast(
+        onListen: _onListen, onCancel: _onCancel, sync: sync);
+  }
+
+  void _onListen() {
+    _subscription = _stream.listen(onData,
+        onError: _controller.addError,
+        onDone: _controller.close,
+        cancelOnError: cancelOnError);
+  }
+
+  void _onCancel() {
+    _subscription.cancel();
+    _subscription = null;
+  }
+
+  void onData(Uint8List data) {
+    if (_partial.length > maxLen) {
+      _partial = _partial.sublist(_partial.length - maxLen);
+    }
+    _partial.addAll(data);    
+
+    while (((_partial.length - terminator.length) > 0)) {
+
+      int index = wildcardFind(terminator, _partial);
+      if ( index < 0 ) {
+        break;
+      }
+      Uint8List message = Uint8List.fromList(_partial.take(index + terminator.length).toList());
+      _controller.add(String.fromCharCodes(message));
+      _partial = _partial.sublist(index + terminator.length);
+    }
+  }
+
+  Stream<String> bind(Stream<Uint8List> stream) {
+    this._stream = stream;
+    return _controller.stream;
+  }
+
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<Uint8List, String, RS, RT>(this);
+}
+
+
+
 /// Assembles messages that start with a fixed sequence of zero or more magic
 /// bytes followed by a single byte that indicates the length of the rest of
 /// the packet.
@@ -129,7 +214,7 @@ class TerminatedTransformer implements Uint8ListTransformer {
 /// 0x10 0x04 0x01 0x02 0x03 0x04
 ///
 /// Will clear input if no data is received for at least 1 second.
-class MagicHeaderAndLengthByteTransformer implements Uint8ListTransformer {
+class MagicHeaderAndLengthByteTransformer implements StreamTransformer<Uint8List, Uint8List> {
   final List<int> header;
   final Duration clearTimeout;
   List<int> _partial;
