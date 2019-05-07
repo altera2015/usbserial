@@ -67,6 +67,9 @@ class UsbPort extends AsyncDataSinkSource {
   /// Constant to configure port with parity none
   static const int PARITY_NONE = 0;
 
+  /// Constant to configure port with event parity.
+  static const int PARITY_EVEN = 2;
+
   /// Constant to configure port with odd parity.
   static const int PARITY_ODD = 1;
 
