@@ -173,7 +173,7 @@ void testMagicHeaderAndLengthByteTransformer() {
 
 void testTransaction() {
 
-  test("Testing Transaction", () async {
+  test("Testing Binary Transaction", () async {
 
     var writeDelay = Duration(milliseconds: 0);
     EchoPort p = EchoPort(writeDelay: writeDelay);
@@ -200,6 +200,35 @@ void testTransaction() {
     ]));
 
   });
+
+
+  test("Testing String Transaction", () async {
+
+    var writeDelay = Duration(milliseconds: 0);
+    EchoPort p = EchoPort(writeDelay: writeDelay);
+    var transaction = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13,10]));
+
+    // While using transactions you can still listen to all 
+    // incoming messages!
+    List< String > _messages = [];
+    transaction.stream.listen( (String data) {
+      _messages.add(data);
+    });
+
+    p.write(Uint8List.fromList([65,66,13,10]));
+    
+    var response = await transaction.transaction(p, Uint8List.fromList([67,68,13,10]), Duration(seconds: 1) );
+    expect(response, equals("CD\r\n"));
+
+    response = await transaction.transaction(p, Uint8List.fromList([20,21,10]), Duration(seconds: 1) );
+    expect(response, equals(null));
+
+    expect(_messages, equals([
+      "AB\r\n",
+      "CD\r\n",      
+    ]));
+
+  });  
 
 
 }
