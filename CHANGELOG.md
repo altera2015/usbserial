@@ -1,3 +1,9 @@
+## 0.2.0
+
+* Added Transformers and Transactions
+* Added unit tests
+* Changed Java naming, if your compile fails delete the 'build' directory and try again.
+
 ## 0.1.1
 
 * Merged pull request 1: Fix for NoSuchMethodException thrown on api level less than 21 

@@ -132,7 +132,7 @@ to the binary format you are dealing with.
 ```dart
 	
 	...
-    var transaction = Transaction.stringTerminated(port.inputStream, Uint8List.fromList([13,10]));
+    Transaction<Uint8List> transaction = Transaction.stringTerminated(port.inputStream, Uint8List.fromList([13,10]));
 	...
 
     // While using transactions you can still listen to all 
