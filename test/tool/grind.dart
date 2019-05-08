@@ -11,7 +11,7 @@ void upload() => Pub.runAsync('coveralls', script: 'coveralls', arguments: ['lco
 @Task('Runs the test suites')
 Future<void> test() async {
   await Future.wait([
-    Dart.runAsync('test/test.dart', vmArgs: ['--enable-vm-service', '--pause-isolates-on-exit']),
+    Dart.runAsync('test.dart', vmArgs: ['--enable-vm-service', '--pause-isolates-on-exit']),
     Pub.runAsync('coverage', script: 'collect_coverage', arguments: ['--out=coverage.json', '--resume-isolates', '--wait-paused'])
   ]);
 

@@ -4,6 +4,6 @@ language: dart
 notifications: {email: false}
 sudo: false
 
-install: pub get
-script: pub run grinder test
-after_success: pub run grinder upload
+install: cd test && pub get
+script: cd test && pub run grinder test
+after_success: cd test && pub run grinder upload
