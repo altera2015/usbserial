@@ -5,13 +5,15 @@ import 'dart:io';
 
 import 'package:grinder_coveralls/grinder_coveralls.dart' as coveralls;
 
+var files = [ "transformers.dart", "transaction.dart", "types.dart" ];
+
 /// Starts the build system.
 Future<void> main(List<String> args) => grind(args);
 
 
 @Task('Collects the code coverage of Dart scripts from a given directory')
 Future<String> collect() async {
-  var files = [ "transformers.dart", "transaction.dart", "types.dart" ];
+  
   
   await Directory("lib").create();
   files.forEach( (file) {
@@ -20,13 +22,7 @@ Future<String> collect() async {
   });
   
   var s = await coveralls.collectCoverage(getFile('test.dart'),saveAs: 'lcov.info', basePath: Directory.current.path, reportOn: ["lib"]);
-  
-  files.forEach( (file) {
-    print("Deleting $file");
-    File("lib/$file").delete();
-  });
-  
-  await Directory("lib").delete();  
+    
   return s;
   
 }
@@ -36,5 +32,12 @@ Future<String> collect() async {
   config['repo_token'] = Platform.environment['COVERALLS_REPO_TOKEN'];  
 
   final coverage = await getFile('lcov.info').readAsString();
-  return coveralls.uploadCoverage(coverage, configuration: config);
+  await coveralls.uploadCoverage(coverage, configuration: config);
+  
+  files.forEach( (file) {
+    print("Deleting $file");
+    File("lib/$file").deleteSync();
+  }); 
+  
+  await Directory("lib").delete();  
 }
