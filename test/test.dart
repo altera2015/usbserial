@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import '../lib/transaction.dart';
-import '../lib/transformers.dart';
+import 'lib/transaction.dart';
+import 'lib/transformers.dart';
 import 'echo_port.dart';
 import "package:test/test.dart";
 
@@ -263,7 +263,7 @@ void testTransaction() {
   });
 }
 
-void main() async {
+void main() {
   group("EchoPort", testEchoPort);
   group("TerminatedTransformer", testTerminated);
   group("StringTerminated", testStringTerminated);
