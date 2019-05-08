@@ -4,48 +4,51 @@ import 'package:async/async.dart';
 import 'types.dart';
 import 'transformers.dart';
 
-/// The transaction class is an easy way to 
+/// The transaction class is an easy way to
 /// use the UsbPort class in a more linear way
 /// without blocking.
-/// 
+///
 /// Example
 /// ```dart
 /// // Create a parser that splits incoming data on endline newline combination ( \n\r)
 /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([10, 13]));
-/// 
+///
 /// // Listen asynchronously if you need this:
 /// c.stream.listen((data) {
 ///   print("ASYNC LISTEN $data");
 /// });
-/// 
+///
 /// var request_1 = Uint8List.fromList([65, 10, 13]);
 /// // Wait two seconds for the answer
-/// 
+///
 /// Uint8List response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
 /// if (response_1 == null ) {
 ///    print("Failed to get a response.");
 /// }
 /// ```
-/// 
+///
 class Transaction<T> {
   Stream<T> stream;
   StreamQueue<T> _queue;
 
-  /// Create a transaction that transforms the incoming stream into 
+  /// Create a transaction that transforms the incoming stream into
   /// events delimited by 'terminator'.
-  static Transaction<Uint8List> terminated( Stream<Uint8List> stream, Uint8List terminator) {
+  static Transaction<Uint8List> terminated(
+      Stream<Uint8List> stream, Uint8List terminator) {
     return Transaction<Uint8List>(stream
         .transform(TerminatedTransformer.broadcast(terminator: terminator)));
   }
 
-  static Transaction<Uint8List> magicHeader( Stream<Uint8List> stream, List<int> header) {
-    return Transaction<Uint8List>(stream
-        .transform(MagicHeaderAndLengthByteTransformer.broadcast(header: header)));
+  static Transaction<Uint8List> magicHeader(
+      Stream<Uint8List> stream, List<int> header) {
+    return Transaction<Uint8List>(stream.transform(
+        MagicHeaderAndLengthByteTransformer.broadcast(header: header)));
   }
 
-  static Transaction<String> stringTerminated( Stream<Uint8List> stream, Uint8List terminator) {
-    return Transaction<String>(stream
-        .transform(TerminatedStringTransformer.broadcast(terminator: terminator)));
+  static Transaction<String> stringTerminated(
+      Stream<Uint8List> stream, Uint8List terminator) {
+    return Transaction<String>(stream.transform(
+        TerminatedStringTransformer.broadcast(terminator: terminator)));
   }
 
   /// Create a new transaction based stream without transforming the input.
@@ -55,7 +58,7 @@ class Transaction<T> {
   }
 
   /// Flush all existing messages from the queue.
-  Future<void> flush() async {    
+  Future<void> flush() async {
     while (true) {
       // Don't call queue._next directly as it will
       // eat the next available message even if it
@@ -64,7 +67,7 @@ class Transaction<T> {
       try {
         bool hasNext = await f;
         if (!hasNext) {
-          // The stream has closed, bail out!          
+          // The stream has closed, bail out!
           return;
         }
         await _queue.next;
@@ -85,7 +88,7 @@ class Transaction<T> {
     // instead use hasNext and then use
     try {
       bool b = await _queue.hasNext.timeout(duration);
-      if ( b ) {
+      if (b) {
         return await _queue.next;
       } else {
         // throw TimeoutException("Port was closed.");
@@ -102,10 +105,10 @@ class Transaction<T> {
   /// 3. Await the answer for at most "duration" time.
   /// returns List of bytes or null on timeout.
   Future<T> transaction(
-      AsyncDataSinkSource port, Uint8List message, Duration duration) async {        
-    await flush();    
-    port.write(message);    
-    return getMsg(duration);    
+      AsyncDataSinkSource port, Uint8List message, Duration duration) async {
+    await flush();
+    port.write(message);
+    return getMsg(duration);
   }
 
   /// Call dispose when you are done with the object.
@@ -114,4 +117,3 @@ class Transaction<T> {
     _queue.cancel();
   }
 }
-
