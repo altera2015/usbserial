@@ -1,4 +1,4 @@
-package com.cree.usbserialexample;
+package dev.bessems.usbserialexample;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

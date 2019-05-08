@@ -152,7 +152,7 @@ to the binary format you are dealing with.
     
 ```
 
-Have a look at [test.dart](https://github.com/altera2015/usbserial/blob/transaction/test/test.dart) if you need more examples.
+Have a look at [test.dart](https://github.com/altera2015/usbserial/blob/master/test/test.dart) if you need more examples.
 
 ## Dependencies
 

@@ -1,4 +1,4 @@
-package com.cree.usbserial;
+package dev.bessems.usbserial;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;

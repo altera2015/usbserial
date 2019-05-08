@@ -1,4 +1,4 @@
-group 'com.cree.usbserial'
+group 'dev.bessems.usbserial'
 version '1.0-SNAPSHOT'
 
 buildscript {

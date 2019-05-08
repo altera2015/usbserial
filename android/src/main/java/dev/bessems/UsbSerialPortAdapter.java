@@ -1,4 +1,4 @@
-package com.cree.usbserial;
+package dev.bessems.usbserial;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.util.Log;
