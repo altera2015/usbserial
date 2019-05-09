@@ -39,17 +39,28 @@ class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
   final Uint8List terminator;
   final int
       maxLen; // maximum length the partial buffer will hold before it starts flushing.
+  final stripTerminator;
 
   StreamController _controller;
   StreamSubscription _subscription;
   Stream<Uint8List> _stream;
   List<int> _partial;
 
+  /// Splits the incoming stream at the given terminator sequence.
+  /// maxLen is the maximum number of bytes that will be collected
+  /// before a terminator is detected. If more data arrives the oldest
+  /// bytes will be discarded.
+  /// terminator is a Uint8List of bytes.
+  /// stripTerminator is a boolean indicating if the terminator should
+  /// remain attached in the output.
+  ///
+  /// This constructor creates a single stream
   TerminatedTransformer(
       {bool sync: false,
       this.cancelOnError,
       this.terminator,
-      this.maxLen = 1024}) {
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<Uint8List>(
         onListen: _onListen,
@@ -63,11 +74,21 @@ class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
         sync: sync);
   }
 
+  /// Splits the incoming stream at the given terminator sequence.
+  /// maxLen is the maximum number of bytes that will be collected
+  /// before a terminator is detected. If more data arrives the oldest
+  /// bytes will be discarded.
+  /// terminator is a Uint8List of bytes.
+  /// stripTerminator is a boolean indicating if the terminator should
+  /// remain attached in the output.
+  ///
+  /// This constructor creates a broadcast stream
   TerminatedTransformer.broadcast(
       {bool sync: false,
       bool this.cancelOnError,
       this.terminator,
-      this.maxLen = 1024}) {
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<Uint8List>.broadcast(
         onListen: _onListen, onCancel: _onCancel, sync: sync);
@@ -96,8 +117,13 @@ class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
       if (index < 0) {
         break;
       }
-      Uint8List message =
-          Uint8List.fromList(_partial.take(index + terminator.length).toList());
+      Uint8List message;
+      if (stripTerminator) {
+        message = Uint8List.fromList(_partial.take(index).toList());
+      } else {
+        message = Uint8List.fromList(
+            _partial.take(index + terminator.length).toList());
+      }
       _controller.add(message);
       _partial = _partial.sublist(index + terminator.length);
     }
@@ -123,17 +149,30 @@ class TerminatedStringTransformer
   final Uint8List terminator;
   final int
       maxLen; // maximum length the partial buffer will hold before it starts flushing.
+  final stripTerminator;
 
   StreamController _controller;
   StreamSubscription _subscription;
   Stream<Uint8List> _stream;
   List<int> _partial;
 
+  /// Splits the incoming stream at the given terminator sequence
+  /// and converts to input to a string.
+  ///
+  /// maxLen is the maximum number of bytes that will be collected
+  /// before a terminator is detected. If more data arrives the oldest
+  /// bytes will be discarded.
+  /// terminator is a Uint8List of bytes.
+  /// stripTerminator is a boolean indicating if the terminator should
+  /// remain attached in the output.
+  ///
+  /// This constructor creates a single string stream
   TerminatedStringTransformer(
       {bool sync: false,
       this.cancelOnError,
       this.terminator,
-      this.maxLen = 1024}) {
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<String>(
         onListen: _onListen,
@@ -147,11 +186,23 @@ class TerminatedStringTransformer
         sync: sync);
   }
 
+  /// Splits the incoming stream at the given terminator sequence
+  /// and converts to input to a string.
+  ///
+  /// maxLen is the maximum number of bytes that will be collected
+  /// before a terminator is detected. If more data arrives the oldest
+  /// bytes will be discarded.
+  /// terminator is a Uint8List of bytes.
+  /// stripTerminator is a boolean indicating if the terminator should
+  /// remain attached in the output.
+  ///
+  /// This constructor creates a broadcast string stream
   TerminatedStringTransformer.broadcast(
       {bool sync: false,
       bool this.cancelOnError,
       this.terminator,
-      this.maxLen = 1024}) {
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<String>.broadcast(
         onListen: _onListen, onCancel: _onCancel, sync: sync);
@@ -180,8 +231,13 @@ class TerminatedStringTransformer
       if (index < 0) {
         break;
       }
-      Uint8List message =
-          Uint8List.fromList(_partial.take(index + terminator.length).toList());
+      Uint8List message;
+      if (stripTerminator) {
+        message = Uint8List.fromList(_partial.take(index).toList());
+      } else {
+        message = Uint8List.fromList(
+            _partial.take(index + terminator.length).toList());
+      }
       _controller.add(String.fromCharCodes(message));
       _partial = _partial.sublist(index + terminator.length);
     }

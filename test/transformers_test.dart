@@ -10,8 +10,8 @@ void testTerminated() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(
-        TerminatedTransformer(terminator: Uint8List.fromList([10, 13])));
+    var stream = p.inputStream.transform(TerminatedTransformer(
+        terminator: Uint8List.fromList([13, 10]), stripTerminator: false));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
       p.write(Uint8List.fromList([
@@ -19,27 +19,27 @@ void testTerminated() {
         2,
         3,
         4,
-        10,
         13,
+        10,
         5,
         6,
         7,
         8,
-        10,
         13,
+        10,
         9,
         10,
         11,
         12,
-        10,
         13,
+        10,
         1,
         2
       ]));
     });
 
     Future<void>.delayed(Duration(milliseconds: 200), () {
-      p.write(Uint8List.fromList([3, 4, 10, 13, 5, 6]));
+      p.write(Uint8List.fromList([3, 4, 13, 10, 5, 6]));
     });
 
     Future<void>.delayed(Duration(milliseconds: 300), () {
@@ -49,10 +49,64 @@ void testTerminated() {
     await expect(
         stream,
         emitsInOrder([
-          Uint8List.fromList([1, 2, 3, 4, 10, 13]),
-          Uint8List.fromList([5, 6, 7, 8, 10, 13]),
-          Uint8List.fromList([9, 10, 11, 12, 10, 13]),
-          Uint8List.fromList([1, 2, 3, 4, 10, 13]),
+          Uint8List.fromList([1, 2, 3, 4, 13, 10]),
+          Uint8List.fromList([5, 6, 7, 8, 13, 10]),
+          Uint8List.fromList([9, 10, 11, 12, 13, 10]),
+          Uint8List.fromList([1, 2, 3, 4, 13, 10]),
+          emitsDone
+        ]));
+  });
+}
+
+void testTerminatedStripped() {
+  test("Testing TerminatedTransformer", () async {
+    var writeDelay = Duration(milliseconds: 10);
+    // Use EchoPort as a Stream Source.
+    EchoPort p = EchoPort(writeDelay: writeDelay);
+
+    var stream = p.inputStream.transform(TerminatedTransformer(
+        terminator: Uint8List.fromList([13, 10]), stripTerminator: true));
+
+    Future<void>.delayed(Duration(milliseconds: 100), () {
+      p.write(Uint8List.fromList([
+        1,
+        2,
+        3,
+        4,
+        13,
+        10,
+        5,
+        6,
+        7,
+        8,
+        13,
+        10,
+        9,
+        10,
+        11,
+        12,
+        13,
+        10,
+        1,
+        2
+      ]));
+    });
+
+    Future<void>.delayed(Duration(milliseconds: 200), () {
+      p.write(Uint8List.fromList([3, 4, 13, 10, 5, 6]));
+    });
+
+    Future<void>.delayed(Duration(milliseconds: 300), () {
+      p.close();
+    });
+
+    await expect(
+        stream,
+        emitsInOrder([
+          Uint8List.fromList([1, 2, 3, 4]),
+          Uint8List.fromList([5, 6, 7, 8]),
+          Uint8List.fromList([9, 10, 11, 12]),
+          Uint8List.fromList([1, 2, 3, 4]),
           emitsDone
         ]));
   });
@@ -64,8 +118,8 @@ void testStringTerminated() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(
-        TerminatedStringTransformer(terminator: Uint8List.fromList([13, 10])));
+    var stream = p.inputStream.transform(TerminatedStringTransformer(
+        terminator: Uint8List.fromList([13, 10]), stripTerminator: false));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
       p.write(Uint8List.fromList([
@@ -104,6 +158,53 @@ void testStringTerminated() {
         stream,
         emitsInOrder(
             ["ABCD\r\n", "EFGH\r\n", "IJKL\r\n", "MNOP\r\n", emitsDone]));
+  });
+}
+
+void testStringTerminatedStripped() {
+  test("Testing TerminatedStringTransformer", () async {
+    var writeDelay = Duration(milliseconds: 10);
+    // Use EchoPort as a Stream Source.
+    EchoPort p = EchoPort(writeDelay: writeDelay);
+
+    var stream = p.inputStream.transform(TerminatedStringTransformer(
+        terminator: Uint8List.fromList([13, 10]), stripTerminator: true));
+
+    Future<void>.delayed(Duration(milliseconds: 100), () {
+      p.write(Uint8List.fromList([
+        65,
+        66,
+        67,
+        68,
+        13,
+        10,
+        69,
+        70,
+        71,
+        72,
+        13,
+        10,
+        73,
+        74,
+        75,
+        76,
+        13,
+        10,
+        77,
+        78
+      ]));
+    });
+
+    Future<void>.delayed(Duration(milliseconds: 200), () {
+      p.write(Uint8List.fromList([79, 80, 13, 10, 83, 84, 85]));
+    });
+
+    Future<void>.delayed(Duration(milliseconds: 300), () {
+      p.close();
+    });
+
+    await expect(
+        stream, emitsInOrder(["ABCD", "EFGH", "IJKL", "MNOP", emitsDone]));
   });
 }
 

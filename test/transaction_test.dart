@@ -9,7 +9,7 @@ void testTransaction() {
     var writeDelay = Duration(milliseconds: 0);
     EchoPort p = EchoPort(writeDelay: writeDelay);
     var transaction =
-        Transaction.terminated(p.inputStream, Uint8List.fromList([10, 13]));
+        Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
 
     // While using transactions you can still listen to all
     // incoming messages!
@@ -18,11 +18,11 @@ void testTransaction() {
       _messages.add(data);
     });
 
-    p.write(Uint8List.fromList([1, 2, 3, 4, 5, 10, 13]));
+    p.write(Uint8List.fromList([1, 2, 3, 4, 5, 13, 10]));
 
     var response = await transaction.transaction(
-        p, Uint8List.fromList([20, 21, 10, 13]), Duration(seconds: 1));
-    expect(response, equals(Uint8List.fromList([20, 21, 10, 13])));
+        p, Uint8List.fromList([20, 21, 13, 10]), Duration(seconds: 1));
+    expect(response, equals(Uint8List.fromList([20, 21])));
 
     response = await transaction.transaction(
         p, Uint8List.fromList([20, 21, 10]), Duration(seconds: 1));
@@ -31,8 +31,8 @@ void testTransaction() {
     expect(
         _messages,
         equals([
-          Uint8List.fromList([1, 2, 3, 4, 5, 10, 13]),
-          Uint8List.fromList([20, 21, 10, 13])
+          Uint8List.fromList([1, 2, 3, 4, 5]),
+          Uint8List.fromList([20, 21])
         ]));
   });
 
@@ -53,7 +53,7 @@ void testTransaction() {
 
     var response = await transaction.transaction(
         p, Uint8List.fromList([67, 68, 13, 10]), Duration(seconds: 1));
-    expect(response, equals("CD\r\n"));
+    expect(response, equals("CD"));
 
     response = await transaction.transaction(
         p, Uint8List.fromList([20, 21, 10]), Duration(seconds: 1));
@@ -62,8 +62,8 @@ void testTransaction() {
     expect(
         _messages,
         equals([
-          "AB\r\n",
-          "CD\r\n",
+          "AB",
+          "CD",
         ]));
   });
 }

@@ -10,15 +10,15 @@ import 'transformers.dart';
 ///
 /// Example
 /// ```dart
-/// // Create a parser that splits incoming data on endline newline combination ( \n\r)
-/// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([10, 13]));
+/// // Create a parser that splits incoming data on endline newline combination ( \r\n)
+/// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
 ///
 /// // Listen asynchronously if you need this:
 /// c.stream.listen((data) {
 ///   print("ASYNC LISTEN $data");
 /// });
 ///
-/// var request_1 = Uint8List.fromList([65, 10, 13]);
+/// var request_1 = Uint8List.fromList([65]);
 /// // Wait two seconds for the answer
 ///
 /// Uint8List response_1 = await c.transaction(p, request_1, Duration(seconds: 2));
