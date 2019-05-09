@@ -24,7 +24,7 @@ script:
   - flutter analyze --no-pub --no-current-package lib
   - flutter test --coverage  
 after_success:
-  - flutter pub run coveralls coverage\lcov.info
+  - flutter pub run coveralls coverage/lcov.info
 
 cache:
   directories:
