@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
-import 'lib/types.dart';
+import 'types.dart';
 
 /// Test harnass stub for UsbPort.
 /// Sends the data back with a delay.

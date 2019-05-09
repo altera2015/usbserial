@@ -1,9 +1,0 @@
-name: tester
-dependencies:
-  async: any
-
-dev_dependencies:
-  test: ^1.5.0
-  coverage: ^0.12.3
-  grinder: ^0.8.3
-  grinder_coveralls: ^0.2.0

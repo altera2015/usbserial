@@ -13,11 +13,9 @@ dependencies:
   async: any
   
 dev_dependencies:
-  test: ^1.5.0
-  coverage: ^0.12.3
-  grinder: ^0.8.3
-  grinder_coveralls: ^0.2.0
-
+  flutter_test:
+    sdk: flutter
+  coveralls: ^5.2.0  
 
 
 # For information on the generic Dart part of this file, see the
