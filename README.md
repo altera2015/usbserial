@@ -131,28 +131,26 @@ to the binary format you are dealing with.
 
 ```dart
 	
-	...
-    Transaction<Uint8List> transaction = Transaction.stringTerminated(port.inputStream, Uint8List.fromList([13,10]));
-	...
+    ...
+    Transaction<String> transaction = Transaction.stringTerminated(port.inputStream, Uint8List.fromList([13,10]));
+    ...
 
     // While using transactions you can still listen to all 
     // incoming messages!    
-    transaction.stream.listen( (Uint8List data) {
+    transaction.stream.listen( (String data) {
       print(data);
     });
 
-	// you can write asynchronous messages as before!
+    // you can write asynchronous messages as before!
     p.write(Uint8List.fromList([65,66,13,10]));
     
-	// BUT you can also write 'transactions'. This is a combination of a flush, write and wait for response
-	// with a timeout. If no response is received within the timeout a null value is returned.
-	// this sends "AB\r\n"
-    var response = await transaction.transaction(p, Uint8List.fromList([65,66,13,10]), Duration(seconds: 1) );    
-	print("The response was $response");
+    // BUT you can also write 'transactions'. This is a combination of a flush, write and wait for response
+    // with a timeout. If no response is received within the timeout a null value is returned.
+    // this sends "AB\r\n"
+    var response = await transaction.transaction(p, Uint8List.fromList([65,66,13,10]), Duration(seconds: 1) );
+    print("The response was $response");
     
 ```
-
-Have a look at [test.dart](https://github.com/altera2015/usbserial/blob/master/test/test.dart) if you need more examples.
 
 ## Dependencies
 

@@ -1,3 +1,8 @@
+## 0.2.1
+
+* Updated the underlying UsbSerial library to 6.0.6
+* Updated the examples
+
 ## 0.2.0
 
 * Added Transformers and Transactions
