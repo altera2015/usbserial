@@ -38,12 +38,13 @@ Arduino at hand the sketch below will create such a magical device for you.
 Below is an abbreviated example showing the essentials to getting the UsbSerial library to work.
 
 ```dart
-	import 'package:usb_serial/usb_serial.dart';
-    import 'package:usb_serial/transaction.dart';
-    
-    var _port;
-    Transaction<String> transaction;
-    StreamSubscription<String> _subscription;
+import 'package:usb_serial/usb_serial.dart';
+import 'package:usb_serial/transaction.dart';
+
+
+class _MyAppState extends State<MyApp> {
+    var _port;    
+    StreamSubscription<Uint8List> _subscription;
     
     @override
     void initState() async {
@@ -63,23 +64,21 @@ Below is an abbreviated example showing the essentials to getting the UsbSerial 
       await _port.setPortParameters(
         115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
       
-      _transaction = Transaction.stringTerminated(_port.inputStream, Uint8List.fromList([13,10]));
-      
-      // While using transactions you can still listen to all 
-      // incoming messages!          
-      _subscription = _transaction.stream.listen((String line) {          
+      _subscription = _port.inputStream.stream.listen((String line) {          
         print(line);        
       });
       
-      p.write(Uint8List.fromList([65,66,13,10]));
+      _port.write(Uint8List.fromList([65,66,13,10]));
     }
     
     @override
     void dispose() {
       super.dispose();
-      _subscription.cancel();
-      _transaction.dispose();  
-      _port.close();
+      if ( _port != null ) {
+        _subscription.cancel();
+        _port.close();
+        _port = null;
+      }
     }
 
 
@@ -87,11 +86,7 @@ Below is an abbreviated example showing the essentials to getting the UsbSerial 
     /// elsewhere in your dart file:
 
     onPressed: () {
-	  // BUT you can also write 'transactions'. This is a combination of a flush, write and wait for response
-	  // with a timeout. If no response is received within the timeout a null value is returned.
-	  // this sends "AB\r\n"
-      var response = await _transaction.transaction(p, Uint8List.fromList([65,66,13,10]), Duration(seconds: 1) );    
-	    print("The response was $response");
+	  _port.write(Uint8List.fromList([65,66,13,10]))
     }
 	
 ```
