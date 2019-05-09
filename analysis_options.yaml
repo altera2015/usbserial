@@ -3,24 +3,22 @@
 # http://dart-lang.github.io/linter/lints/options/options.html
 linter:
   rules:
-    - camel_case_types
     - hash_and_equals
     - iterable_contains_unrelated_type
     - list_remove_unrelated_type
-    - unrelated_type_equality_checks
     - valid_regexps
     - always_declare_return_types
-    - camel_case_types
     - empty_constructor_bodies
     - annotate_overrides
     - avoid_init_to_null
-    - constant_identifier_names
     - one_member_abstracts
     - slash_for_doc_comments
-    - sort_constructors_first
     - unnecessary_brace_in_string_interps
 
 analyzer:
   strong-mode:
-    implicit-casts: false
-    implicit-dynamic: false
+    implicit-casts: true
+    implicit-dynamic: true
+  exclude:
+    - test/test.dart
+    - test/echo_port.dart

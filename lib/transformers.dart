@@ -103,11 +103,13 @@ class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
     }
   }
 
+  @override
   Stream<Uint8List> bind(Stream<Uint8List> stream) {
     this._stream = stream;
     return _controller.stream;
   }
 
+  @override
   StreamTransformer<RS, RT> cast<RS, RT>() =>
       StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
 }
@@ -185,11 +187,13 @@ class TerminatedStringTransformer
     }
   }
 
+  @override
   Stream<String> bind(Stream<Uint8List> stream) {
     this._stream = stream;
     return _controller.stream;
   }
 
+  @override
   StreamTransformer<RS, RT> cast<RS, RT>() =>
       StreamTransformer.castFrom<Uint8List, String, RS, RT>(this);
 }
@@ -301,11 +305,13 @@ class MagicHeaderAndLengthByteTransformer
     }
   }
 
+  @override
   Stream<Uint8List> bind(Stream<Uint8List> stream) {
     this._stream = stream;
     return _controller.stream;
   }
 
+  @override
   StreamTransformer<RS, RT> cast<RS, RT>() =>
       StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
 

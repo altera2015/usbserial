@@ -11,6 +11,11 @@ class EchoPort extends AsyncDataSinkSource {
   List<Uint8List> _buffer;
   final Duration writeDelay;
 
+  EchoPort({this.writeDelay = const Duration(seconds: 0)}) {
+    _stream = fakeData();
+    _buffer = [];
+  }
+
   Stream<Uint8List> fakeData() {
     void start() {
       _running = true;
@@ -32,11 +37,7 @@ class EchoPort extends AsyncDataSinkSource {
     return _controller.stream;
   }
 
-  EchoPort({this.writeDelay = const Duration(seconds: 0)}) {
-    _stream = fakeData();
-    _buffer = [];
-  }
-
+  @override
   Stream<Uint8List> get inputStream {
     return _stream;
   }
@@ -49,8 +50,9 @@ class EchoPort extends AsyncDataSinkSource {
     }
   }
 
+  @override
   Future<void> write(Uint8List data) async {
-    if ( writeDelay == Duration(seconds: 0)) {
+    if (writeDelay == Duration(seconds: 0)) {
       return _write(data);
     } else {
       Future<void>.delayed(writeDelay, () {

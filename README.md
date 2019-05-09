@@ -1,4 +1,4 @@
-[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial)
+[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Build Status](https://travis-ci.org/altera2015/usbserial.svg?branch=master)](https://travis-ci.org/altera2015/usbserial) [![Coverage Status](https://coveralls.io/repos/github/altera2015/usbserial/badge.svg?branch=master)](https://coveralls.io/github/altera2015/usbserial?branch=master)
 
 # usb_serial
 

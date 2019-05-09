@@ -1,7 +1,6 @@
 name: tester
 dependencies:
   async: any
-  test: any
 
 dev_dependencies:
   test: ^1.5.0

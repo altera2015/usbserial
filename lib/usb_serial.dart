@@ -33,6 +33,7 @@ class UsbEvent {
   /// The device for which the event was fired.
   UsbDevice device;
 
+  @override
   String toString() {
     return "UsbEvent: $event, $device";
   }
@@ -114,11 +115,13 @@ class UsbPort extends AsyncDataSinkSource {
   /// ```
   ///
   /// This will print out the data as it arrives from the uart.
+  ///
+  @override
   Stream<Uint8List> get inputStream {
     if (_inputStream == null) {
       _inputStream = _eventChannel
           .receiveBroadcastStream()
-          .map<Uint8List>((value) => value);
+          .map<Uint8List>((dynamic value) => value);
     }
     return _inputStream;
   }
@@ -146,6 +149,7 @@ class UsbPort extends AsyncDataSinkSource {
   }
 
   /// Asynchronously writes [data].
+  @override
   Future<void> write(Uint8List data) async {
     return await _channel.invokeMethod("write", {"data": data});
   }
@@ -199,6 +203,7 @@ class UsbDevice {
         json["manufacturerName"], json["deviceId"], json["serialNumber"]);
   }
 
+  @override
   String toString() {
     return "UsbDevice: ${vid.toRadixString(16)}-${pid.toRadixString(16)} $productName, $manufacturerName $serial";
   }
