@@ -85,7 +85,7 @@ class TerminatedTransformer implements StreamTransformer<Uint8List, Uint8List> {
   /// This constructor creates a broadcast stream
   TerminatedTransformer.broadcast(
       {bool sync: false,
-      bool this.cancelOnError,
+      this.cancelOnError,
       this.terminator,
       this.maxLen = 1024,
       this.stripTerminator = true}) {
@@ -199,7 +199,7 @@ class TerminatedStringTransformer
   /// This constructor creates a broadcast string stream
   TerminatedStringTransformer.broadcast(
       {bool sync: false,
-      bool this.cancelOnError,
+      this.cancelOnError,
       this.terminator,
       this.maxLen = 1024,
       this.stripTerminator = true}) {
@@ -303,7 +303,7 @@ class MagicHeaderAndLengthByteTransformer
 
   MagicHeaderAndLengthByteTransformer.broadcast(
       {bool sync: false,
-      bool this.cancelOnError,
+      this.cancelOnError,
       this.header,
       this.maxLen = 1024,
       this.clearTimeout = const Duration(seconds: 1)}) {

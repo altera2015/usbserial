@@ -1,3 +1,7 @@
+## 0.2.2
+
+* Fixed 3 dart lint warnings.
+
 ## 0.2.1
 
 * Updated the underlying UsbSerial library to 6.0.6
