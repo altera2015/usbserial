@@ -2,6 +2,8 @@ package dev.bessems.usbserial;
 
 import android.hardware.usb.UsbDeviceConnection;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
@@ -23,6 +25,7 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
     private Registrar m_Registrar;
     private String m_MethodChannelName;
     private EventChannel.EventSink m_EventSink;
+    private Handler m_handler;
 
     UsbSerialPortAdapter(Registrar registrar, int interfaceId, UsbDeviceConnection connection, UsbSerialDevice serialDevice) {
         m_Registrar = registrar;
@@ -30,6 +33,7 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
         m_Connection = connection;
         m_SerialDevice = serialDevice;
         m_MethodChannelName = "usb_serial/UsbSerialPortAdapter/" + String.valueOf(interfaceId);
+        m_handler = new Handler(Looper.getMainLooper());
         final MethodChannel channel = new MethodChannel(registrar.messenger(), m_MethodChannelName);
         channel.setMethodCallHandler(this);
         final EventChannel eventChannel = new EventChannel(registrar.messenger(), m_MethodChannelName + "/stream");
@@ -57,7 +61,12 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
         public void onReceivedData(byte[] arg0)
         {
             if ( m_EventSink != null ) {
-                m_EventSink.success(arg0);
+                m_handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        m_EventSink.success(arg0);
+                    }
+                });
             }
         }
 
