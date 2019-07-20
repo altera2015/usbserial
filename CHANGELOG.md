@@ -1,3 +1,7 @@
+## 0.2.3
+
+* Fixed threading issue ( PR10 )
+
 ## 0.2.2
 
 * Fixed 3 dart lint warnings.
