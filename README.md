@@ -12,7 +12,7 @@ Add a dependency to your pubspec.yaml
 
 ```dart
 dependencies:
-	usb_serial: ^0.2.3
+	usb_serial: ^0.2.4
 ```
 
 include the usbserial package at the top of your dart file.
@@ -71,10 +71,13 @@ and place device_filter.xml
     
     <!-- 0x067B / 0x2303: Prolific PL2303 -->
     <usb-device vendor-id="1659" product-id="8963" />
-    
+
     <!-- 0x1366 / 0x0105: Segger JLink -->
     <usb-device vendor-id="4966" product-id="261" />
-    
+
+    <!-- 0x1366 / 0x0105: CH340 JLink -->
+    <usb-device vendor-id="1A86" product-id="7523" />
+
 </resources>
 ```
 
