@@ -64,7 +64,9 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
                 m_handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        m_EventSink.success(arg0);
+                        if ( m_EventSink != null ) {
+                            m_EventSink.success(arg0);
+                        }
                     }
                 });
             }
