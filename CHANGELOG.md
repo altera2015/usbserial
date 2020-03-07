@@ -1,6 +1,9 @@
 ## 0.2.3
 
 * Fixed threading issue ( PR10 )
+* Added interfaceCount
+* Added CH340 VID/PID to example xml.
+* Added exception catch for Device Create
 
 ## 0.2.2
 

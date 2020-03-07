@@ -179,6 +179,8 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
             } else {
                 result.error(TAG, "Failed to acquire USB permission.", null);
             }
+        } catch ( java.lang.Exception e ) {
+            result.error(TAG, "Failed to acquire USB device.", null);
         }
     }
 
@@ -202,6 +204,7 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             dev.put("manufacturerName", device.getManufacturerName());
             dev.put("productName", device.getProductName());
+            dev.put("interfaceCount", device.getInterfaceCount());
             /* if the app targets SDK >= android.os.Build.VERSION_CODES.Q and the app does not have permission to read from the device. */
             try {
                 dev.put("serialNumber", device.getSerialNumber());

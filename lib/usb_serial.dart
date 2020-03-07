@@ -195,12 +195,21 @@ class UsbDevice {
   /// The Serial number from the USB device.
   final String serial;
 
+  /// The number of interfaces on this UsbPort
+  final int interfaceCount;
+
   UsbDevice(this.vid, this.pid, this.productName, this.manufacturerName,
-      this.deviceId, this.serial);
+      this.deviceId, this.serial, this.interfaceCount);
 
   static UsbDevice fromJSON(dynamic json) {
-    return UsbDevice(json["vid"], json["pid"], json["productName"],
-        json["manufacturerName"], json["deviceId"], json["serialNumber"]);
+    return UsbDevice(
+        json["vid"],
+        json["pid"],
+        json["productName"],
+        json["manufacturerName"],
+        json["deviceId"],
+        json["serialNumber"],
+        json["interfaceCount"]);
   }
 
   @override
