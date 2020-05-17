@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'types.dart';
@@ -40,7 +41,7 @@ class UsbEvent {
 }
 
 /// UsbPort handles the communication with the USB Serial port.
-class UsbPort extends AsyncDataSinkSource {
+class UsbPort extends AsyncDataSinkSource with EquatableMixin {
   /// Constant to configure port with 5 databits.
   static const int DATABITS_5 = 5;
 
@@ -93,6 +94,21 @@ class UsbPort extends AsyncDataSinkSource {
   final EventChannel _eventChannel;
   Stream<Uint8List> _inputStream;
 
+  int _baudRate;
+  int _dataBits;
+  int _stopBits;
+  int _parity;
+
+  int _flowControl;
+
+  bool _dtr;
+  bool _rts;
+
+  int get baudrate => _baudRate;
+  int get dataBits => _dataBits;
+  int get stopBits => _stopBits;
+  int get parity => _parity;
+
   UsbPort._internal(this._channel, this._eventChannel);
 
   /// Factory to create UsbPort object.
@@ -140,11 +156,13 @@ class UsbPort extends AsyncDataSinkSource {
 
   /// Sets or clears the DTR port to value [dtr].
   Future<void> setDTR(bool dtr) async {
+    _dtr = dtr;
     return await _channel.invokeMethod("setDTR", {"value": dtr});
   }
 
   /// Sets or clears the RTS port to value [rts].
   Future<void> setRTS(bool rts) async {
+    _rts = rts;
     return await _channel.invokeMethod("setRTS", {"value": rts});
   }
 
@@ -161,6 +179,11 @@ class UsbPort extends AsyncDataSinkSource {
   /// ```
   Future<void> setPortParameters(
       int baudRate, int dataBits, int stopBits, int parity) async {
+    _baudRate = baudRate;
+    _dataBits = dataBits;
+    _stopBits = stopBits;
+    _parity = parity;
+
     return await _channel.invokeMethod("setPortParameters", {
       "baudRate": baudRate,
       "dataBits": dataBits,
@@ -171,15 +194,89 @@ class UsbPort extends AsyncDataSinkSource {
 
   /// Sets the flow control parameter.
   Future<void> setFlowControl(int flowControl) async {
+    _flowControl = flowControl;
     return await _channel
         .invokeMethod("setFlowControl", {"flowControl": flowControl});
+  }
+
+  /// return string name of databits
+  String dataBitToString() {
+    switch (this._dataBits) {
+      case (5):
+        return "DATABITS_5";
+      case (6):
+        return "DATABITS_6";
+      case (7):
+        return "DATABITS_7";
+      case (8):
+        return "DATABITS_8";
+      default:
+        return "unknown";
+    }
+  }
+
+  /// return string name of flowcontrol
+  String flowControlToString() {
+    switch (_flowControl) {
+      case (0):
+        return "FLOW_CONTROL_OFF";
+      case (1):
+        return "FLOW_CONTROL_RTS_CTS";
+      case (2):
+        return "FLOW_CONTROL_DSR_DTR";
+      case (3):
+        return "FLOW_CONTROL_XON_XOFF";
+      default:
+        return "unknown";
+    }
+  }
+
+  /// return string name of parity
+  String parityToString() {
+    switch (_parity) {
+      case (0):
+        return "PARITY_NONE";
+      case (1):
+        return "PARITY_ODD";
+      case (2):
+        return "PARITY_EVEN";
+      case (3):
+        return "PARITY_MARK";
+      case (4):
+        return "PARITY_SPACE";
+      default:
+        return "unknown";
+    }
+  }
+
+  /// return string name of stop bits
+  String stopBitsToString() {
+    switch (_stopBits) {
+      case (1):
+        return "STOPBITS_1";
+      case (2):
+        return "STOPBITS_2";
+      case (3):
+        return "STOPBITS_1_5";
+      default:
+        return "unknown";
+    }
+  }
+
+  /// Equatable implementation for value equality
+  @override
+  List<Object> get props => [_baudRate, _dataBits, _stopBits, _parity, _flowControl, _rts, _dtr];
+
+  @override
+  String toString() {
+    return "Buad rate : $_baudRate, Data bits : ${dataBitToString()}, Stop bits : ${stopBitsToString()}, Parity : ${parityToString()}, Flow control : ${flowControlToString()}, RTS : ${_rts.toString()}, DTR : ${_dtr.toString()} ";
   }
 }
 
 /// UsbDevice holds the USB device information
 ///
 /// This is used to determine which Usb Device to open.
-class UsbDevice {
+class UsbDevice extends Equatable {
   /// Vendor Id
   final int vid;
 
@@ -225,6 +322,9 @@ class UsbDevice {
   Future<UsbPort> create([String type = "", int iface = -1]) {
     return UsbSerial.createFromDeviceId(deviceId, type, iface);
   }
+
+  @override
+  List<Object> get props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
 }
 
 /// UsbSerial is the main entry point into this class and can

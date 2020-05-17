@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   List<Widget> _serialData = [];
   StreamSubscription<String> _subscription;
   Transaction<String> _transaction;
-  int _deviceId;
+  UsbDevice _device;
   TextEditingController _textController = TextEditingController();
 
   Future<bool> _connectTo(device) async {
@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     if (device == null) {
-      _deviceId = null;
+      _device = null;
       setState(() {
         _status = "Disconnected";
       });
@@ -54,8 +54,8 @@ class _MyAppState extends State<MyApp> {
       });
       return false;
     }
+    _device = device;
 
-    _deviceId = device.deviceId;
     await _port.setDTR(true);
     await _port.setRTS(true);
     await _port.setPortParameters(
@@ -82,6 +82,9 @@ class _MyAppState extends State<MyApp> {
   void _getPorts() async {
     _ports = [];
     List<UsbDevice> devices = await UsbSerial.listDevices();
+    if (!devices.contains(_device)) {
+      _connectTo(null);
+    }
     print(devices);
 
     devices.forEach((device) {
@@ -91,9 +94,9 @@ class _MyAppState extends State<MyApp> {
           subtitle: Text(device.manufacturerName),
           trailing: RaisedButton(
             child:
-                Text(_deviceId == device.deviceId ? "Disconnect" : "Connect"),
+                Text(_device == device ? "Disconnect" : "Connect"),
             onPressed: () {
-              _connectTo(_deviceId == device.deviceId ? null : device)
+              _connectTo(_device == device ? null : device)
                   .then((res) {
                 _getPorts();
               });
@@ -139,6 +142,7 @@ class _MyAppState extends State<MyApp> {
             style: Theme.of(context).textTheme.title),
         ..._ports,
         Text('Status: $_status\n'),
+        Text('info: ${_port.toString()}\n'),
         ListTile(
           title: TextField(
             controller: _textController,
