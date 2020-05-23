@@ -289,6 +289,11 @@ class UsbDevice extends Equatable {
   /// when replugged this ID will be different.
   final int deviceId;
 
+  // save the device port
+  UsbPort _port;
+  // port getter
+  UsbPort get port => _port;
+
   /// The Serial number from the USB device.
   final String serial;
 
@@ -319,8 +324,9 @@ class UsbDevice extends Equatable {
   /// [type] can be any of the [UsbSerial.CDC], [UsbSerial.CH34x], [UsbSerial.CP210x], [UsbSerial.FTDI] or [USBSerial.PL2303] values or empty for auto detection.
   /// [iface] is the USB interface to use or -1 to auto detect.
   /// returns the new UsbPort or throws an error on open failure.
-  Future<UsbPort> create([String type = "", int iface = -1]) {
-    return UsbSerial.createFromDeviceId(deviceId, type, iface);
+  Future<UsbPort> create([String type = "", int iface = -1]) async {
+    _port = await UsbSerial.createFromDeviceId(deviceId, type, iface);
+    return  _port;
   }
 
   @override
