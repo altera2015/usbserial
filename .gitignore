@@ -36,3 +36,4 @@ local.properties
 **/.idea/dynamic.xml
 **/.idea/uiDesigner.xml
 **/.idea/assetWizardSettings.xml
+.idea/*.iml
