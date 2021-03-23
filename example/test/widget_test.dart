@@ -14,12 +14,16 @@ void main() {
   testWidgets('Verify Platform version', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp());
-
     // Verify that platform version is retrieved.
     expect(
       find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is Text && widget.data.startsWith('Last Event:'),
+            (Widget widget) {
+          if (widget is Text) {
+            print(widget.data);
+          }
+          return widget is Text &&
+              (widget.data?.startsWith('Result Data') ?? false);
+        },
       ),
       findsOneWidget,
     );

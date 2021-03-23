@@ -46,7 +46,7 @@ void testTerminated() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([1, 2, 3, 4, 13, 10]),
@@ -100,7 +100,7 @@ void testTerminatedStripped() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([1, 2, 3, 4]),
@@ -154,7 +154,7 @@ void testStringTerminated() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder(
             ["ABCD\r\n", "EFGH\r\n", "IJKL\r\n", "MNOP\r\n", emitsDone]));
@@ -203,7 +203,7 @@ void testStringTerminatedStripped() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream, emitsInOrder(["ABCD", "EFGH", "IJKL", "MNOP", emitsDone]));
   });
 }
@@ -231,7 +231,7 @@ void testMagicHeaderAndLengthByteTransformer() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([65, 66, 2, 1, 2]),
@@ -262,7 +262,7 @@ void testMagicHeaderAndLengthByteTransformer() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([65, 80, 2, 1, 2]),
