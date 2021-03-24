@@ -1,3 +1,6 @@
+## 0.3.0
+* flutter 2.0 & null safety support
+
 ## 0.2.4
 
 * Added interfaceCount
