@@ -12,7 +12,7 @@ Add a dependency to your pubspec.yaml
 
 ```dart
 dependencies:
-	usb_serial: ^0.2.99
+	usb_serial: ^0.2.991
 ```
 
 include the usbserial package at the top of your dart file.
@@ -98,7 +98,7 @@ onPressed: () async {
 	}
 	port = await devices[0].create();
 
-	bool openResult = await _port.open();
+	bool openResult = await port.open();
 	if ( !openResult ) {
 		print("Failed to open");
 		return;

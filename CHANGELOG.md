@@ -1,3 +1,8 @@
+## 0.2.991
+
+* Addressed issue #46
+* Fixed @immutable error
+
 ## 0.2.99
 
 * Merged null safety pull request

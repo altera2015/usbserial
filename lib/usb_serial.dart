@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:equatable/equatable.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 
 import 'types.dart';
+
+class _Equality {
+  static final Function deepEq = const DeepCollectionEquality().equals;
+  static final Function deepHash = const DeepCollectionEquality().hash;
+}
 
 /// Created when a USB event occurs. For example a USB device is plugged
 /// in or removed.
@@ -41,7 +46,7 @@ class UsbEvent {
 }
 
 /// UsbPort handles the communication with the USB Serial port.
-class UsbPort extends AsyncDataSinkSource with EquatableMixin {
+class UsbPort extends AsyncDataSinkSource {
   /// Constant to configure port with 5 databits.
   static const int DATABITS_5 = 5;
 
@@ -253,9 +258,20 @@ class UsbPort extends AsyncDataSinkSource with EquatableMixin {
     }
   }
 
-  /// Equatable implementation for value equality
+  List<Object> get _props => [_baudRate, _dataBits, _stopBits, _parity, _flowControl, _rts, _dtr];
+
   @override
-  List<Object> get props => [_baudRate, _dataBits, _stopBits, _parity, _flowControl, _rts, _dtr];
+  bool operator ==(other) {
+    if (!(other is UsbPort)) {
+      return false;
+    }
+    return _Equality.deepEq(_props, other._props);
+  }
+
+  @override
+  int get hashCode {
+    return _Equality.deepHash(_props);
+  }
 
   @override
   String toString() {
@@ -266,7 +282,7 @@ class UsbPort extends AsyncDataSinkSource with EquatableMixin {
 /// UsbDevice holds the USB device information
 ///
 /// This is used to determine which Usb Device to open.
-class UsbDevice extends Equatable {
+class UsbDevice {
   /// Vendor Id
   final int? vid;
 
@@ -312,8 +328,20 @@ class UsbDevice extends Equatable {
     return _port;
   }
 
+  List<Object?> get _props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
+
   @override
-  List<Object?> get props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
+  bool operator ==(other) {
+    if (!(other is UsbDevice)) {
+      return false;
+    }
+    return _Equality.deepEq(_props, other._props);
+  }
+
+  @override
+  int get hashCode {
+    return _Equality.deepHash(_props);
+  }
 }
 
 /// UsbSerial is the main entry point into this class and can

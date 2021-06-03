@@ -20,7 +20,6 @@ class _MyAppState extends State<MyApp> {
 
   StreamSubscription<String>? _subscription;
   Transaction<String>? _transaction;
-  int? _deviceId;
   UsbDevice? _device;
 
   TextEditingController _textController = TextEditingController();
@@ -60,7 +59,6 @@ class _MyAppState extends State<MyApp> {
     }
     _device = device;
 
-    _deviceId = device.deviceId;
     await _port!.setDTR(true);
     await _port!.setRTS(true);
     await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
