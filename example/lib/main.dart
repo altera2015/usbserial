@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'dart:typed_data';
 import 'dart:async';
-import 'package:usb_serial/usb_serial.dart';
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
 import 'package:usb_serial/transaction.dart';
+import 'package:usb_serial/usb_serial.dart';
 
 void main() => runApp(MyApp());
 
@@ -16,9 +17,12 @@ class _MyAppState extends State<MyApp> {
   String _status = "Idle";
   List<Widget> _ports = [];
   List<Widget> _serialData = [];
+
   StreamSubscription<String>? _subscription;
   Transaction<String>? _transaction;
   int? _deviceId;
+  UsbDevice? _device;
+
   TextEditingController _textController = TextEditingController();
 
   Future<bool> _connectTo(device) async {
@@ -40,7 +44,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     if (device == null) {
-      _deviceId = null;
+      _device = null;
       setState(() {
         _status = "Disconnected";
       });
@@ -48,21 +52,20 @@ class _MyAppState extends State<MyApp> {
     }
 
     _port = await device.create();
-    if (await (_port!.open() as FutureOr<bool?>) != true) {
+    if (await (_port!.open()) != true) {
       setState(() {
         _status = "Failed to open port";
       });
       return false;
     }
+    _device = device;
 
     _deviceId = device.deviceId;
     await _port!.setDTR(true);
     await _port!.setRTS(true);
-    await _port!.setPortParameters(
-        115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+    await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
-    _transaction = Transaction.stringTerminated(
-        _port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
+    _transaction = Transaction.stringTerminated(_port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
 
     _subscription = _transaction!.stream.listen((String line) {
       setState(() {
@@ -82,6 +85,9 @@ class _MyAppState extends State<MyApp> {
   void _getPorts() async {
     _ports = [];
     List<UsbDevice> devices = await UsbSerial.listDevices();
+    if (!devices.contains(_device)) {
+      _connectTo(null);
+    }
     print(devices);
 
     devices.forEach((device) {
@@ -90,11 +96,9 @@ class _MyAppState extends State<MyApp> {
           title: Text(device.productName!),
           subtitle: Text(device.manufacturerName!),
           trailing: ElevatedButton(
-            child:
-                Text(_deviceId == device.deviceId ? "Disconnect" : "Connect"),
+            child: Text(_device == device ? "Disconnect" : "Connect"),
             onPressed: () {
-              _connectTo(_deviceId == device.deviceId ? null : device)
-                  .then((res) {
+              _connectTo(_device == device ? null : device).then((res) {
                 _getPorts();
               });
             },
@@ -132,13 +136,10 @@ class _MyAppState extends State<MyApp> {
       ),
       body: Center(
           child: Column(children: <Widget>[
-        Text(
-            _ports.length > 0
-                ? "Available Serial Ports"
-                : "No serial devices available",
-            style: Theme.of(context).textTheme.headline6),
+        Text(_ports.length > 0 ? "Available Serial Ports" : "No serial devices available", style: Theme.of(context).textTheme.headline6),
         ..._ports,
         Text('Status: $_status\n'),
+        Text('info: ${_port.toString()}\n'),
         ListTile(
           title: TextField(
             controller: _textController,
