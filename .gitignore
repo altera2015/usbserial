@@ -36,3 +36,5 @@ local.properties
 **/.idea/dynamic.xml
 **/.idea/uiDesigner.xml
 **/.idea/assetWizardSettings.xml
+example/ios/Podfile
+example/ios/Podfile.lock

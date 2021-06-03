@@ -10,7 +10,7 @@ void testTerminated() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(TerminatedTransformer(
+    var stream = p.inputStream!.transform(TerminatedTransformer(
         terminator: Uint8List.fromList([13, 10]), stripTerminator: false));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -46,7 +46,7 @@ void testTerminated() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([1, 2, 3, 4, 13, 10]),
@@ -64,7 +64,7 @@ void testTerminatedStripped() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(TerminatedTransformer(
+    var stream = p.inputStream!.transform(TerminatedTransformer(
         terminator: Uint8List.fromList([13, 10]), stripTerminator: true));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -100,7 +100,7 @@ void testTerminatedStripped() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([1, 2, 3, 4]),
@@ -118,7 +118,7 @@ void testStringTerminated() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(TerminatedStringTransformer(
+    var stream = p.inputStream!.transform(TerminatedStringTransformer(
         terminator: Uint8List.fromList([13, 10]), stripTerminator: false));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -154,7 +154,7 @@ void testStringTerminated() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder(
             ["ABCD\r\n", "EFGH\r\n", "IJKL\r\n", "MNOP\r\n", emitsDone]));
@@ -167,7 +167,7 @@ void testStringTerminatedStripped() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream.transform(TerminatedStringTransformer(
+    var stream = p.inputStream!.transform(TerminatedStringTransformer(
         terminator: Uint8List.fromList([13, 10]), stripTerminator: true));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -203,7 +203,7 @@ void testStringTerminatedStripped() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream, emitsInOrder(["ABCD", "EFGH", "IJKL", "MNOP", emitsDone]));
   });
 }
@@ -215,7 +215,7 @@ void testMagicHeaderAndLengthByteTransformer() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream
+    var stream = p.inputStream!
         .transform(MagicHeaderAndLengthByteTransformer(header: [65, 66]));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -231,7 +231,7 @@ void testMagicHeaderAndLengthByteTransformer() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([65, 66, 2, 1, 2]),
@@ -246,7 +246,7 @@ void testMagicHeaderAndLengthByteTransformer() {
     // Use EchoPort as a Stream Source.
     EchoPort p = EchoPort(writeDelay: writeDelay);
 
-    var stream = p.inputStream
+    var stream = p.inputStream!
         .transform(MagicHeaderAndLengthByteTransformer(header: [65, null]));
 
     Future<void>.delayed(Duration(milliseconds: 100), () {
@@ -262,7 +262,7 @@ void testMagicHeaderAndLengthByteTransformer() {
       p.close();
     });
 
-    await expect(
+    expect(
         stream,
         emitsInOrder([
           Uint8List.fromList([65, 80, 2, 1, 2]),
