@@ -28,10 +28,10 @@ class UsbEvent {
       "android.hardware.usb.action.USB_DEVICE_DETACHED";
 
   /// either ACTION_USB_ATTACHED or ACTION_USB_DETACHED
-  String event;
+  String? event;
 
   /// The device for which the event was fired.
-  UsbDevice device;
+  UsbDevice? device;
 
   @override
   String toString() {
@@ -91,7 +91,7 @@ class UsbPort extends AsyncDataSinkSource {
 
   final MethodChannel _channel;
   final EventChannel _eventChannel;
-  Stream<Uint8List> _inputStream;
+  Stream<Uint8List>? _inputStream;
 
   UsbPort._internal(this._channel, this._eventChannel);
 
@@ -117,7 +117,7 @@ class UsbPort extends AsyncDataSinkSource {
   /// This will print out the data as it arrives from the uart.
   ///
   @override
-  Stream<Uint8List> get inputStream {
+  Stream<Uint8List>? get inputStream {
     if (_inputStream == null) {
       _inputStream = _eventChannel
           .receiveBroadcastStream()
@@ -181,22 +181,22 @@ class UsbPort extends AsyncDataSinkSource {
 /// This is used to determine which Usb Device to open.
 class UsbDevice {
   /// Vendor Id
-  final int vid;
+  final int? vid;
 
   /// Product Id
-  final int pid;
-  final String productName;
-  final String manufacturerName;
+  final int? pid;
+  final String? productName;
+  final String? manufacturerName;
 
   /// The device id is unique to this Usb Device until it is unplugged.
   /// when replugged this ID will be different.
-  final int deviceId;
+  final int? deviceId;
 
   /// The Serial number from the USB device.
-  final String serial;
+  final String? serial;
 
   /// The number of interfaces on this UsbPort
-  final int interfaceCount;
+  final int? interfaceCount;
 
   UsbDevice(this.vid, this.pid, this.productName, this.manufacturerName,
       this.deviceId, this.serial, this.interfaceCount);
@@ -214,7 +214,7 @@ class UsbDevice {
 
   @override
   String toString() {
-    return "UsbDevice: ${vid.toRadixString(16)}-${pid.toRadixString(16)} $productName, $manufacturerName $serial";
+    return "UsbDevice: ${vid!.toRadixString(16)}-${pid!.toRadixString(16)} $productName, $manufacturerName $serial";
   }
 
   /// Creates a UsbPort from the UsbDevice.
@@ -222,7 +222,7 @@ class UsbDevice {
   /// [type] can be any of the [UsbSerial.CDC], [UsbSerial.CH34x], [UsbSerial.CP210x], [UsbSerial.FTDI] or [USBSerial.PL2303] values or empty for auto detection.
   /// [iface] is the USB interface to use or -1 to auto detect.
   /// returns the new UsbPort or throws an error on open failure.
-  Future<UsbPort> create([String type = "", int iface = -1]) {
+  Future<UsbPort?> create([String type = "", int iface = -1]) {
     return UsbSerial.createFromDeviceId(deviceId, type, iface);
   }
 }
@@ -248,7 +248,7 @@ class UsbSerial {
   static const MethodChannel _channel = const MethodChannel('usb_serial');
   static const EventChannel _eventChannel =
       const EventChannel('usb_serial/usb_events');
-  static Stream<UsbEvent> _eventStream;
+  static Stream<UsbEvent>? _eventStream;
 
   /// Use this stream to detect if a USB device is plugged in or removed.
   ///
@@ -266,7 +266,7 @@ class UsbSerial {
   ///   });
   /// }
   /// ```
-  static Stream<UsbEvent> get usbEventStream {
+  static Stream<UsbEvent>? get usbEventStream {
     if (_eventStream == null) {
       _eventStream =
           _eventChannel.receiveBroadcastStream().map<UsbEvent>((value) {
@@ -292,9 +292,9 @@ class UsbSerial {
   /// ```dart
   /// UsbPort port = await UsbSerial.create(0x1000, 0x2000);
   /// ```
-  static Future<UsbPort> create(int vid, int pid,
+  static Future<UsbPort?> create(int vid, int pid,
       [String type = "", int interface = -1]) async {
-    String methodChannelName = await _channel.invokeMethod("create", {
+    String? methodChannelName = await _channel.invokeMethod("create", {
       "type": type,
       "vid": vid,
       "pid": pid,
@@ -317,9 +317,9 @@ class UsbSerial {
   ///
   /// [type] = One of [UserSerial.CDC], [UsbSerial.CH34x], [UsbSerial.CP210x], [UsbSerial.FTDI], [UsbSerial.PL2303] or empty for auto detect.
   /// [interface] = Interface of the Usb Interface, -1 for auto detect.
-  static Future<UsbPort> createFromDeviceId(int deviceId,
+  static Future<UsbPort?> createFromDeviceId(int? deviceId,
       [String type = "", int interface = -1]) async {
-    String methodChannelName = await _channel.invokeMethod("create", {
+    String? methodChannelName = await _channel.invokeMethod("create", {
       "type": type,
       "vid": -1,
       "pid": -1,
@@ -336,7 +336,8 @@ class UsbSerial {
 
   /// Returns a list of UsbDevices currently plugged in.
   static Future<List<UsbDevice>> listDevices() async {
-    List<dynamic> devices = await _channel.invokeMethod("listDevices");
-    return devices.map(UsbDevice.fromJSON).toList();
+    List<dynamic> devices =
+        await (_channel.invokeMethod("listDevices") as FutureOr<dynamic>);
+    return devices.map<UsbDevice>(UsbDevice.fromJSON).toList();
   }
 }

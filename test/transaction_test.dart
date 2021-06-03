@@ -9,7 +9,7 @@ void testTransaction() {
     var writeDelay = Duration(milliseconds: 0);
     EchoPort p = EchoPort(writeDelay: writeDelay);
     var transaction =
-        Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
+        Transaction.terminated(p.inputStream!, Uint8List.fromList([13, 10]));
 
     // While using transactions you can still listen to all
     // incoming messages!
@@ -40,7 +40,7 @@ void testTransaction() {
     var writeDelay = Duration(milliseconds: 0);
     EchoPort p = EchoPort(writeDelay: writeDelay);
     var transaction = Transaction.stringTerminated(
-        p.inputStream, Uint8List.fromList([13, 10]));
+        p.inputStream!, Uint8List.fromList([13, 10]));
 
     // While using transactions you can still listen to all
     // incoming messages!
