@@ -1,7 +1,9 @@
 import 'dart:async';
-import 'package:equatable/equatable.dart';
 import 'dart:typed_data';
+
+import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
+
 import 'types.dart';
 
 /// Created when a USB event occurs. For example a USB device is plugged
@@ -92,17 +94,17 @@ class UsbPort extends AsyncDataSinkSource with EquatableMixin {
   final EventChannel _eventChannel;
   Stream<Uint8List>? _inputStream;
 
-  int _baudRate;
-  int _dataBits;
-  int _stopBits;
-  int _parity;
+  int _baudRate = 115200;
+  int _dataBits = UsbPort.DATABITS_8;
+  int _stopBits = UsbPort.STOPBITS_1;
+  int _parity = UsbPort.PARITY_NONE;
 
-  int _flowControl;
+  int _flowControl = UsbPort.FLOW_CONTROL_OFF;
 
-  bool _dtr;
-  bool _rts;
+  bool _dtr = false;
+  bool _rts = false;
 
-  int get baudrate => _baudRate;
+  int get baudRate => _baudRate;
   int get dataBits => _dataBits;
   int get stopBits => _stopBits;
   int get parity => _parity;
@@ -177,14 +179,14 @@ class UsbPort extends AsyncDataSinkSource with EquatableMixin {
     _dataBits = dataBits;
     _stopBits = stopBits;
     _parity = parity;
-  
+
     return await _channel.invokeMethod("setPortParameters", {"baudRate": baudRate, "dataBits": dataBits, "stopBits": stopBits, "parity": parity});
   }
 
   /// Sets the flow control parameter.
   Future<void> setFlowControl(int flowControl) async {
     _flowControl = flowControl;
-    return await _channel
+    return await _channel.invokeMethod("setFlowControl", {"flowControl": flowControl});
   }
 
   /// return string name of databits
@@ -278,9 +280,9 @@ class UsbDevice extends Equatable {
   final int? deviceId;
 
   // save the device port
-  UsbPort _port;
+  UsbPort? _port;
   // port getter
-  UsbPort get port => _port;
+  UsbPort? get port => _port;
 
   /// The Serial number from the USB device.
   final String? serial;
@@ -305,13 +307,13 @@ class UsbDevice extends Equatable {
   /// [iface] is the USB interface to use or -1 to auto detect.
   /// returns the new UsbPort or throws an error on open failure.
 
-  Future<UsbPort> create([String type = "", int iface = -1]) async {
+  Future<UsbPort?> create([String type = "", int iface = -1]) async {
     _port = await UsbSerial.createFromDeviceId(deviceId, type, iface);
-    return  _port;
+    return _port;
   }
 
   @override
-  List<Object> get props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
+  List<Object?> get props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
 }
 
 /// UsbSerial is the main entry point into this class and can
