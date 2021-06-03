@@ -1,3 +1,7 @@
+## 0.2.99
+
+* Merged null safety pull request
+
 ## 0.2.4
 
 * Added interfaceCount
