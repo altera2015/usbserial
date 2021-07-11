@@ -22,20 +22,22 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.common.EventChannel;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.BinaryMessenger;
 
+import androidx.annotation.NonNull;
 
 
 /** UsbSerialPlugin */
-public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHandler {
+public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
 
     private final String TAG = UsbSerialPortAdapter.class.getSimpleName();
 
     private android.content.Context m_Context;
     private UsbManager m_Manager;
     private int m_InterfaceId;
-    private Registrar m_Registrar;
+    private BinaryMessenger m_Messenger;
     private EventChannel.EventSink m_EventSink;
 
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -67,19 +69,11 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
         }
     };
 
-
-    UsbSerialPlugin(Registrar registrar) {
-        m_Registrar = registrar;
-        m_Context = registrar.context();
-        m_Manager = (UsbManager) m_Context.getSystemService(android.content.Context.USB_SERVICE);
-        m_InterfaceId = 100;
-        final EventChannel eventChannel = new EventChannel(registrar.messenger(), "usb_serial/usb_events");
-        eventChannel.setStreamHandler(this);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_USB_DETACHED);
-        filter.addAction(ACTION_USB_ATTACHED);
-        m_Context.registerReceiver(usbReceiver, filter);
+    public UsbSerialPlugin() {
+        m_Messenger = null;
+        m_Context = null;
+        m_Manager = null;
+        m_InterfaceId = 0;
     }
 
 
@@ -120,7 +114,7 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
             }
         }
 
-        Context cw = m_Registrar.context();
+        Context cw = m_Context; //m_Registrar.context();
 
         BRC2 usbReceiver = new BRC2(device, cb);
 
@@ -164,7 +158,7 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
 
             if (serialDeviceDevice != null) {
                 int interfaceId = m_InterfaceId++;
-                UsbSerialPortAdapter adapter = new UsbSerialPortAdapter(m_Registrar, interfaceId, connection, serialDeviceDevice);
+                UsbSerialPortAdapter adapter = new UsbSerialPortAdapter(m_Messenger, interfaceId, connection, serialDeviceDevice);
                 result.success(adapter.getMethodChannelName());
                 Log.d(TAG, "success.");
                 return;
@@ -239,19 +233,53 @@ public class UsbSerialPlugin implements MethodCallHandler, EventChannel.StreamHa
     @Override
     public void onCancel(Object o) {
         m_EventSink = null;
-
     }
 
 
-    /** Plugin registration. */
-    public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "usb_serial");
-        channel.setMethodCallHandler(new UsbSerialPlugin(registrar));
+    private EventChannel m_EventChannel;
+    private void register(BinaryMessenger messenger, android.content.Context context) {
+        m_Messenger = messenger;
+        m_Context = context;
+        m_Manager = (UsbManager) m_Context.getSystemService(android.content.Context.USB_SERVICE);
+        m_InterfaceId = 100;
+        m_EventChannel = new EventChannel(messenger, "usb_serial/usb_events");
+        m_EventChannel.setStreamHandler(this);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_USB_DETACHED);
+        filter.addAction(ACTION_USB_ATTACHED);
+        m_Context.registerReceiver(usbReceiver, filter);
     }
 
+    private void unregister() {
+        m_Context.unregisterReceiver(usbReceiver);
+        m_EventChannel.setStreamHandler(null);
+        m_Manager = null;
+        m_Context = null;
+        m_Messenger = null;
+    }
+
+
+    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
+    /// when the Flutter Engine is detached from the Activity
+    private MethodChannel m_Channel;
 
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        register(flutterPluginBinding.getBinaryMessenger(), flutterPluginBinding.getApplicationContext());
+        m_Channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "usb_serial");
+        m_Channel.setMethodCallHandler(this);
+
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        m_Channel.setMethodCallHandler(null);
+        unregister();
+    }
+
+    @Override
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
 
         switch (call.method) {
 
