@@ -2,6 +2,7 @@
 
 * Implemented v2 Android embedding
 * Updated UsbSerial to 6.1.0
+* Transaction constructor signature changed to fix issue #39 (see test testTwoTransformersInSequence)
 
 ## 0.2.991
 
