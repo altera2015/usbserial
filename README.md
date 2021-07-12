@@ -1,4 +1,4 @@
-[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Build Status](https://travis-ci.org/altera2015/usbserial.svg?branch=master)](https://travis-ci.org/altera2015/usbserial) [![Coverage Status](https://coveralls.io/repos/github/altera2015/usbserial/badge.svg?branch=master)](https://coveralls.io/github/altera2015/usbserial?branch=master)
+[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Flutter](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml/badge.svg)](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml)
 
 # usb_serial
 
@@ -12,7 +12,7 @@ Add a dependency to your pubspec.yaml
 
 ```dart
 dependencies:
-	usb_serial: ^0.2.991
+	usb_serial: ^0.2.992
 ```
 
 include the usbserial package at the top of your dart file.
@@ -154,6 +154,48 @@ to the binary format you are dealing with.
     print("The response was $response");
     
 ```
+
+## Upgrading from 0.2.9XXX
+
+
+In version 0.3.0 a resource bug was fixed (issue #35) which required signature 
+changes.
+
+
+### Transformer Class changes
+
+The Transformer classes previously inherited directly from StreamTransformer, this class 
+however has not dispose method. So a new abstract class was added to include dispose and 
+called by Transaction.dispose().
+
+```dart
+abstract class DisposableStreamTransformer<T, R> implements StreamTransformer<T, R> {
+  void dispose();
+}
+```
+
+Steps:
+
+* Change parent class to DisposableStreamTransformer
+* Implement dispose class, and make sure to dispose of your StreamController
+   
+### Transaction Class changes
+
+The Transaction class previously did not have access to the transformer, only the stream. 
+The signature of Transaction constructor changed from
+
+```dart
+Transaction<T>(Stream<T>);
+```
+
+to 
+
+```dart
+Transaction(Stream<Uint8List> stream, DisposableStreamTransformer<Uint8List, T> transformer);
+```
+
+If you are using the static factory methods you should not have to make any changes to your
+code. Only if you created your own Transformer/Transactions.
 
 ## Dependencies
 

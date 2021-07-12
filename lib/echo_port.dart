@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+
 import 'types.dart';
 
 /// Test harnass stub for UsbPort.
@@ -31,8 +32,9 @@ class EchoPort extends AsyncDataSinkSource {
       _running = false;
     }
 
-    _controller = StreamController<Uint8List>(
-        onListen: start, onPause: stop, onResume: start, onCancel: stop);
+    // _controller = StreamController(
+    //     onListen: start, onPause: stop, onResume: start, onCancel: stop);
+    _controller = StreamController.broadcast(onListen: start, onCancel: stop);
 
     return _controller.stream;
   }

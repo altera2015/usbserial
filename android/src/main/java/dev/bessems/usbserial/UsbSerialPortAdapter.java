@@ -13,7 +13,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.plugin.common.BinaryMessenger;
 
 public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.StreamHandler {
 
@@ -22,21 +22,21 @@ public class UsbSerialPortAdapter implements MethodCallHandler, EventChannel.Str
     private int m_InterfaceId;
     private UsbDeviceConnection m_Connection;
     private UsbSerialDevice m_SerialDevice;
-    private Registrar m_Registrar;
+    private BinaryMessenger m_Messenger;
     private String m_MethodChannelName;
     private EventChannel.EventSink m_EventSink;
     private Handler m_handler;
 
-    UsbSerialPortAdapter(Registrar registrar, int interfaceId, UsbDeviceConnection connection, UsbSerialDevice serialDevice) {
-        m_Registrar = registrar;
+    UsbSerialPortAdapter(BinaryMessenger messenger, int interfaceId, UsbDeviceConnection connection, UsbSerialDevice serialDevice) {
+        m_Messenger = messenger;
         m_InterfaceId = interfaceId;
         m_Connection = connection;
         m_SerialDevice = serialDevice;
         m_MethodChannelName = "usb_serial/UsbSerialPortAdapter/" + String.valueOf(interfaceId);
         m_handler = new Handler(Looper.getMainLooper());
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), m_MethodChannelName);
+        final MethodChannel channel = new MethodChannel(m_Messenger, m_MethodChannelName);
         channel.setMethodCallHandler(this);
-        final EventChannel eventChannel = new EventChannel(registrar.messenger(), m_MethodChannelName + "/stream");
+        final EventChannel eventChannel = new EventChannel(m_Messenger, m_MethodChannelName + "/stream");
         eventChannel.setStreamHandler(this);
     }
 
