@@ -165,7 +165,7 @@ changes.
 ### Transformer Class changes
 
 The Transformer classes previously inherited directly from StreamTransformer, this class 
-however has not dispose method. So a new abstract class was added to include dispose and 
+however has no dispose method. So a new abstract class was added to include dispose and 
 called by Transaction.dispose().
 
 ```dart
