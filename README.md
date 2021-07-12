@@ -155,7 +155,7 @@ to the binary format you are dealing with.
     
 ```
 
-## Upgrading from 0.2.9XXX
+## Upgrading from pre-0.3.0
 
 
 In version 0.3.0 a resource bug was fixed (issue #35) which required signature 
