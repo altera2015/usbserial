@@ -155,6 +155,48 @@ to the binary format you are dealing with.
     
 ```
 
+## Upgrading from 0.2.9XXX
+
+
+In version 0.3.0 a resource bug was fixed (issue #35) which required signature 
+changes.
+
+
+### Transformer Class changes
+
+The Transformer classes previously inherited directly from StreamTransformer, this class 
+however has not dispose method. So a new abstract class was added to include dispose and 
+called by Transaction.dispose().
+
+```dart
+abstract class DisposableStreamTransformer<T, R> implements StreamTransformer<T, R> {
+  void dispose();
+}
+```
+
+Steps:
+
+* Change parent class to DisposableStreamTransformer
+* Implement dispose class, and make sure to dispose of your StreamController
+   
+### Transaction Class changes
+
+The Transaction class previously did not have access to the transformer, only the stream. 
+The signature of Transaction constructor changed from
+
+```dart
+Transaction<T>(Stream<T>);
+```
+
+to 
+
+```dart
+Transaction(Stream<Uint8List> stream, DisposableStreamTransformer<Uint8List, T> transformer);
+```
+
+If you are using the static factory methods you should not have to make any changes to your
+code. Only if you created your own Transformer/Transactions.
+
 ## Dependencies
 
 This library depends on:

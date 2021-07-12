@@ -1,4 +1,4 @@
-## 0.2.992
+## 0.3.0
 
 * Implemented v2 Android embedding
 * Updated UsbSerial to 6.1.0

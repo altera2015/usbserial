@@ -31,6 +31,7 @@ int wildcardFind(dynamic needle, dynamic haystack) {
   return -1;
 }
 
+/// parent abstract class to all transformers adding dispose method.
 abstract class DisposableStreamTransformer<T, R> implements StreamTransformer<T, R> {
   void dispose();
 }

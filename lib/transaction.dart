@@ -36,22 +36,35 @@ class Transaction<T> {
 
   /// Create a transaction that transforms the incoming stream into
   /// events delimited by 'terminator'.
+  ///
+  /// ```dart
+  /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
+  /// ```
   static Transaction<Uint8List> terminated(Stream<Uint8List> stream, Uint8List terminator) {
     return Transaction<Uint8List>(stream, TerminatedTransformer.broadcast(terminator: terminator));
   }
 
+  /// Create a transaction that uses MagicHeaderAndLengthByteTransformer
+  ///
+  /// ```dart
+  /// Transaction.magicHeader(p.inputStream, Uint8List.fromList([65,65,65])); // expects magic header AAA and then byte of length.
+  /// ```
   static Transaction<Uint8List> magicHeader(Stream<Uint8List> stream, List<int> header) {
     return Transaction<Uint8List>(stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
   }
 
+  /// Create a transaction that transforms the incoming stream into
+  /// events delimited by 'terminator', returning Strings.
+  ///
+  /// ```dart
+  /// var c = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13, 10]));
+  /// ```
   static Transaction<String> stringTerminated(Stream<Uint8List> stream, Uint8List terminator) {
     return Transaction<String>(stream, TerminatedStringTransformer.broadcast(terminator: terminator));
   }
 
-  /// Transactions must be created using Transaction.withTransformer
-  ///
-  /// This will ensure that the transformer is properly disposed
-  /// when the transaction is disposed.
+  /// Transaction Constructor, pass it the untransformed input stream and
+  /// the transformer to work on the stream.
   Transaction(Stream<Uint8List> stream, DisposableStreamTransformer<Uint8List, T> transformer)
       : this.stream = stream.transform(transformer),
         _transformer = transformer {
