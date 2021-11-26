@@ -193,6 +193,7 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
     private HashMap<String, Object> serializeDevice(UsbDevice device) {
         HashMap<String, Object> dev = new HashMap<>();
+        dev.put("deviceName", device.getDeviceName());
         dev.put("vid", device.getVendorId());
         dev.put("pid", device.getProductId());
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {

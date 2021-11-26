@@ -283,6 +283,8 @@ class UsbPort extends AsyncDataSinkSource {
 ///
 /// This is used to determine which Usb Device to open.
 class UsbDevice {
+  final String deviceName;
+
   /// Vendor Id
   final int? vid;
 
@@ -306,15 +308,19 @@ class UsbDevice {
   /// The number of interfaces on this UsbPort
   final int? interfaceCount;
 
-  UsbDevice(this.vid, this.pid, this.productName, this.manufacturerName, this.deviceId, this.serial, this.interfaceCount);
+  UsbDevice(
+      this.deviceName, this.vid, this.pid, this.productName,
+      this.manufacturerName, this.deviceId, this.serial, this.interfaceCount);
 
   static UsbDevice fromJSON(dynamic json) {
-    return UsbDevice(json["vid"], json["pid"], json["productName"], json["manufacturerName"], json["deviceId"], json["serialNumber"], json["interfaceCount"]);
+    return UsbDevice(
+        json["deviceName"], json["vid"], json["pid"], json["productName"],
+        json["manufacturerName"], json["deviceId"], json["serialNumber"], json["interfaceCount"]);
   }
 
   @override
   String toString() {
-    return "UsbDevice: ${vid!.toRadixString(16)}-${pid!.toRadixString(16)} $productName, $manufacturerName $serial";
+    return "UsbDevice: $deviceName, ${vid!.toRadixString(16)}-${pid!.toRadixString(16)} $productName, $manufacturerName $serial";
   }
 
   /// Creates a UsbPort from the UsbDevice.
@@ -335,12 +341,12 @@ class UsbDevice {
     if (!(other is UsbDevice)) {
       return false;
     }
-    return _Equality.deepEq(_props, other._props);
+    return this.deviceName == other.deviceName;
   }
 
   @override
   int get hashCode {
-    return _Equality.deepHash(_props);
+    return this.deviceName.hashCode;
   }
 }
 
