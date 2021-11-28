@@ -1,3 +1,6 @@
+## 0.4.0
+* Use deviceName (unique and not null) for equal operator and hashCode.
+
 ## 0.3.0
 
 * Implemented v2 Android embedding
