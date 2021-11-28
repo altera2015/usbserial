@@ -334,8 +334,6 @@ class UsbDevice {
     return _port;
   }
 
-  List<Object?> get _props => [vid, pid, productName, manufacturerName, deviceId, serial, interfaceCount];
-
   @override
   bool operator ==(other) {
     if (!(other is UsbDevice)) {
