@@ -118,7 +118,13 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
         BRC2 usbReceiver = new BRC2(device, cb);
 
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(cw, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        int flags = 0;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            flags = PendingIntent.FLAG_MUTABLE;
+        }
+
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(cw, 0, new Intent(ACTION_USB_PERMISSION), flags);
 
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
         cw.registerReceiver(usbReceiver, filter);
