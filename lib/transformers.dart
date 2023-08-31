@@ -32,17 +32,20 @@ int wildcardFind(dynamic needle, dynamic haystack) {
 }
 
 /// parent abstract class to all transformers adding dispose method.
-abstract class DisposableStreamTransformer<T, R> implements StreamTransformer<T, R> {
+abstract class DisposableStreamTransformer<T, R>
+    implements StreamTransformer<T, R> {
   void dispose();
 }
 
 /// This transformer takes an incoming stream and splits it
 /// along the "terminator" marks. Great for parsing incoming
 /// serial streams that end on \r\n.
-class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Uint8List> {
+class TerminatedTransformer
+    implements DisposableStreamTransformer<Uint8List, Uint8List> {
   bool? cancelOnError;
   final Uint8List? terminator;
-  final int maxLen; // maximum length the partial buffer will hold before it starts flushing.
+  final int
+      maxLen; // maximum length the partial buffer will hold before it starts flushing.
   final stripTerminator;
 
   late StreamController _controller;
@@ -59,7 +62,12 @@ class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Ui
   /// remain attached in the output.
   ///
   /// This constructor creates a single stream
-  TerminatedTransformer({bool sync: false, this.cancelOnError, this.terminator, this.maxLen = 1024, this.stripTerminator = true}) {
+  TerminatedTransformer(
+      {bool sync = false,
+      this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<Uint8List>(
         onListen: _onListen,
@@ -82,13 +90,22 @@ class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Ui
   /// remain attached in the output.
   ///
   /// This constructor creates a broadcast stream
-  TerminatedTransformer.broadcast({bool sync: false, this.cancelOnError, this.terminator, this.maxLen = 1024, this.stripTerminator = true}) {
+  TerminatedTransformer.broadcast(
+      {bool sync = false,
+      this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
-    _controller = new StreamController<Uint8List>.broadcast(onListen: _onListen, onCancel: _onCancel, sync: sync);
+    _controller = new StreamController<Uint8List>.broadcast(
+        onListen: _onListen, onCancel: _onCancel, sync: sync);
   }
 
   void _onListen() {
-    _subscription = _stream.listen(onData, onError: _controller.addError, onDone: _controller.close, cancelOnError: cancelOnError);
+    _subscription = _stream.listen(onData,
+        onError: _controller.addError,
+        onDone: _controller.close,
+        cancelOnError: cancelOnError);
   }
 
   void _onCancel() {
@@ -111,7 +128,8 @@ class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Ui
       if (stripTerminator) {
         message = Uint8List.fromList(_partial.take(index).toList());
       } else {
-        message = Uint8List.fromList(_partial.take(index + terminator!.length).toList());
+        message = Uint8List.fromList(
+            _partial.take(index + terminator!.length).toList());
       }
 
       _controller.add(message);
@@ -126,7 +144,8 @@ class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Ui
   }
 
   @override
-  StreamTransformer<RS, RT> cast<RS, RT>() => StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
 
   @override
   void dispose() {
@@ -137,10 +156,12 @@ class TerminatedTransformer implements DisposableStreamTransformer<Uint8List, Ui
 /// This transformer takes an incoming stream and splits it
 /// along the "terminator" marks and returns a String! Great
 /// for parsing incoming serial streams that end on \r\n.
-class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8List, String> {
+class TerminatedStringTransformer
+    implements DisposableStreamTransformer<Uint8List, String> {
   bool? cancelOnError;
   final Uint8List? terminator;
-  final int maxLen; // maximum length the partial buffer will hold before it starts flushing.
+  final int
+      maxLen; // maximum length the partial buffer will hold before it starts flushing.
   final stripTerminator;
 
   late StreamController _controller;
@@ -159,7 +180,12 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8Li
   /// remain attached in the output.
   ///
   /// This constructor creates a single string stream
-  TerminatedStringTransformer({bool sync: false, this.cancelOnError, this.terminator, this.maxLen = 1024, this.stripTerminator = true}) {
+  TerminatedStringTransformer(
+      {bool sync = false,
+      this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
     _controller = new StreamController<String>(
         onListen: _onListen,
@@ -184,13 +210,22 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8Li
   /// remain attached in the output.
   ///
   /// This constructor creates a broadcast string stream
-  TerminatedStringTransformer.broadcast({bool sync: false, this.cancelOnError, this.terminator, this.maxLen = 1024, this.stripTerminator = true}) {
+  TerminatedStringTransformer.broadcast(
+      {bool sync = false,
+      this.cancelOnError,
+      this.terminator,
+      this.maxLen = 1024,
+      this.stripTerminator = true}) {
     _partial = [];
-    _controller = new StreamController<String>.broadcast(onListen: _onListen, onCancel: _onCancel, sync: sync);
+    _controller = new StreamController<String>.broadcast(
+        onListen: _onListen, onCancel: _onCancel, sync: sync);
   }
 
   void _onListen() {
-    _subscription = _stream.listen(onData, onError: _controller.addError, onDone: _controller.close, cancelOnError: cancelOnError);
+    _subscription = _stream.listen(onData,
+        onError: _controller.addError,
+        onDone: _controller.close,
+        cancelOnError: cancelOnError);
   }
 
   void _onCancel() {
@@ -213,7 +248,8 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8Li
       if (stripTerminator) {
         message = Uint8List.fromList(_partial.take(index).toList());
       } else {
-        message = Uint8List.fromList(_partial.take(index + terminator!.length).toList());
+        message = Uint8List.fromList(
+            _partial.take(index + terminator!.length).toList());
       }
       _controller.add(String.fromCharCodes(message));
       _partial = _partial.sublist(index + terminator!.length);
@@ -227,7 +263,8 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8Li
   }
 
   @override
-  StreamTransformer<RS, RT> cast<RS, RT>() => StreamTransformer.castFrom<Uint8List, String, RS, RT>(this);
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<Uint8List, String, RS, RT>(this);
 
   @override
   void dispose() {
@@ -248,20 +285,27 @@ class TerminatedStringTransformer implements DisposableStreamTransformer<Uint8Li
 /// 0x10 0x04 0x01 0x02 0x03 0x04
 ///
 /// Will clear input if no data is received for at least 1 second.
-class MagicHeaderAndLengthByteTransformer implements DisposableStreamTransformer<Uint8List, Uint8List> {
+class MagicHeaderAndLengthByteTransformer
+    implements DisposableStreamTransformer<Uint8List, Uint8List> {
   final List<int?>? header;
   final Duration clearTimeout;
   late List<int> _partial;
   Timer? _timer;
   late bool _dataSinceLastTick;
   bool? cancelOnError;
-  final int maxLen; // maximum length the partial buffer will hold before it starts flushing.
+  final int
+      maxLen; // maximum length the partial buffer will hold before it starts flushing.
 
   late StreamController _controller;
   StreamSubscription? _subscription;
   late Stream<Uint8List> _stream;
 
-  MagicHeaderAndLengthByteTransformer({bool sync: false, this.cancelOnError, this.header, this.maxLen = 1024, this.clearTimeout = const Duration(seconds: 1)}) {
+  MagicHeaderAndLengthByteTransformer(
+      {bool sync = false,
+      this.cancelOnError,
+      this.header,
+      this.maxLen = 1024,
+      this.clearTimeout = const Duration(seconds: 1)}) {
     _partial = [];
     _controller = new StreamController<Uint8List>(
         onListen: _onListen,
@@ -276,14 +320,22 @@ class MagicHeaderAndLengthByteTransformer implements DisposableStreamTransformer
   }
 
   MagicHeaderAndLengthByteTransformer.broadcast(
-      {bool sync: false, this.cancelOnError, this.header, this.maxLen = 1024, this.clearTimeout = const Duration(seconds: 1)}) {
+      {bool sync = false,
+      this.cancelOnError,
+      this.header,
+      this.maxLen = 1024,
+      this.clearTimeout = const Duration(seconds: 1)}) {
     _partial = [];
-    _controller = new StreamController<Uint8List>.broadcast(onListen: _onListen, onCancel: _onCancel, sync: sync);
+    _controller = new StreamController<Uint8List>.broadcast(
+        onListen: _onListen, onCancel: _onCancel, sync: sync);
   }
 
   void _onListen() {
     _startTimer();
-    _subscription = _stream.listen(onData, onError: _controller.addError, onDone: _controller.close, cancelOnError: cancelOnError);
+    _subscription = _stream.listen(onData,
+        onError: _controller.addError,
+        onDone: _controller.close,
+        cancelOnError: cancelOnError);
   }
 
   void _onCancel() {
@@ -321,7 +373,8 @@ class MagicHeaderAndLengthByteTransformer implements DisposableStreamTransformer
         return;
       }
 
-      _controller.add(Uint8List.fromList(_partial.sublist(0, len + header!.length + 1)));
+      _controller.add(
+          Uint8List.fromList(_partial.sublist(0, len + header!.length + 1)));
       _partial = _partial.sublist(len + header!.length + 1);
     }
   }
@@ -333,7 +386,8 @@ class MagicHeaderAndLengthByteTransformer implements DisposableStreamTransformer
   }
 
   @override
-  StreamTransformer<RS, RT> cast<RS, RT>() => StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
+  StreamTransformer<RS, RT> cast<RS, RT>() =>
+      StreamTransformer.castFrom<Uint8List, Uint8List, RS, RT>(this);
 
   void _onTimer(Timer timer) {
     if (_partial.length > 0 && !_dataSinceLastTick) {

@@ -40,8 +40,14 @@ class Transaction<T> {
   /// ```dart
   /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
-  static Transaction<Uint8List> terminated(Stream<Uint8List> stream, Uint8List terminator) {
-    return Transaction<Uint8List>(stream, TerminatedTransformer.broadcast(terminator: terminator));
+  static Transaction<Uint8List> terminated(Stream<Uint8List> stream,
+      Uint8List terminator, int maxLen, bool cancelOnError) {
+    return Transaction<Uint8List>(
+        stream,
+        TerminatedTransformer.broadcast(
+            terminator: terminator,
+            maxLen: maxLen,
+            cancelOnError: cancelOnError));
   }
 
   /// Create a transaction that uses MagicHeaderAndLengthByteTransformer
@@ -49,8 +55,10 @@ class Transaction<T> {
   /// ```dart
   /// Transaction.magicHeader(p.inputStream, Uint8List.fromList([65,65,65])); // expects magic header AAA and then byte of length.
   /// ```
-  static Transaction<Uint8List> magicHeader(Stream<Uint8List> stream, List<int> header) {
-    return Transaction<Uint8List>(stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
+  static Transaction<Uint8List> magicHeader(
+      Stream<Uint8List> stream, List<int> header) {
+    return Transaction<Uint8List>(
+        stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
   }
 
   /// Create a transaction that transforms the incoming stream into
@@ -59,13 +67,16 @@ class Transaction<T> {
   /// ```dart
   /// var c = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
-  static Transaction<String> stringTerminated(Stream<Uint8List> stream, Uint8List terminator) {
-    return Transaction<String>(stream, TerminatedStringTransformer.broadcast(terminator: terminator));
+  static Transaction<String> stringTerminated(
+      Stream<Uint8List> stream, Uint8List terminator) {
+    return Transaction<String>(
+        stream, TerminatedStringTransformer.broadcast(terminator: terminator));
   }
 
   /// Transaction Constructor, pass it the untransformed input stream and
   /// the transformer to work on the stream.
-  Transaction(Stream<Uint8List> stream, DisposableStreamTransformer<Uint8List, T> transformer)
+  Transaction(Stream<Uint8List> stream,
+      DisposableStreamTransformer<Uint8List, T> transformer)
       : this.stream = stream.transform(transformer),
         _transformer = transformer {
     _queue = StreamQueue<T>(this.stream);
@@ -118,7 +129,8 @@ class Transaction<T> {
   /// 2. Write the message
   /// 3. Await the answer for at most "duration" time.
   /// returns List of bytes or null on timeout.
-  Future<T?> transaction(AsyncDataSinkSource port, Uint8List message, Duration duration) async {
+  Future<T?> transaction(
+      AsyncDataSinkSource port, Uint8List message, Duration duration) async {
     await flush();
     port.write(message);
     return getMsg(duration);
