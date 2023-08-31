@@ -41,7 +41,7 @@ class Transaction<T> {
   /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
   static Transaction<Uint8List> terminated(Stream<Uint8List> stream,
-      Uint8List terminator, int maxLen = 1024, bool stripTerminator = true) {
+      Uint8List terminator, int maxLen: 1024, bool stripTerminator: true) {
     return Transaction<Uint8List>(
         stream,
         TerminatedTransformer.broadcast(
