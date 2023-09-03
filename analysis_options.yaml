@@ -4,8 +4,6 @@
 linter:
   rules:
     - hash_and_equals
-    - iterable_contains_unrelated_type
-    - list_remove_unrelated_type
     - valid_regexps
     - always_declare_return_types
     - empty_constructor_bodies
