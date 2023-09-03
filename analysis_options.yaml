@@ -16,9 +16,6 @@ linter:
     - unnecessary_brace_in_string_interps
 
 analyzer:
-  strong-mode:
-    implicit-casts: true
-    implicit-dynamic: true
   exclude:
     - test/test.dart
     - test/echo_port.dart
