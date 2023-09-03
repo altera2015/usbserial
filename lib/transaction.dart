@@ -57,9 +57,12 @@ class Transaction<T> {
   /// Transaction.magicHeader(p.inputStream, Uint8List.fromList([65,65,65])); // expects magic header AAA and then byte of length.
   /// ```
   static Transaction<Uint8List> magicHeader(
-      Stream<Uint8List> stream, List<int> header) {
+      Stream<Uint8List> stream, List<int> header,
+      {int maxLen: 1024}) {
     return Transaction<Uint8List>(
-        stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
+        stream,
+        MagicHeaderAndLengthByteTransformer.broadcast(
+            header: header, maxLen: maxLen));
   }
 
   /// Create a transaction that transforms the incoming stream into
@@ -69,9 +72,14 @@ class Transaction<T> {
   /// var c = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
   static Transaction<String> stringTerminated(
-      Stream<Uint8List> stream, Uint8List terminator) {
+      Stream<Uint8List> stream, Uint8List terminator,
+      {int maxLen: 1024, bool stripTerminator: true}) {
     return Transaction<String>(
-        stream, TerminatedStringTransformer.broadcast(terminator: terminator));
+        stream,
+        TerminatedStringTransformer.broadcast(
+            terminator: terminator,
+            maxLen: maxLen,
+            stripTerminator: stripTerminator));
   }
 
   /// Transaction Constructor, pass it the untransformed input stream and
