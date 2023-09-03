@@ -40,9 +40,8 @@ class Transaction<T> {
   /// ```dart
   /// var c = Transaction.terminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
-  static Transaction<Uint8List> terminated(
-      Stream<Uint8List> stream, Uint8List terminator,
-      {int maxLen: 1024, bool stripTerminator: true}) {
+  static Transaction<Uint8List> terminated(Stream<Uint8List> stream,
+      Uint8List terminator, int maxLen: 1024, bool stripTerminator: true) {
     return Transaction<Uint8List>(
         stream,
         TerminatedTransformer.broadcast(
@@ -57,12 +56,9 @@ class Transaction<T> {
   /// Transaction.magicHeader(p.inputStream, Uint8List.fromList([65,65,65])); // expects magic header AAA and then byte of length.
   /// ```
   static Transaction<Uint8List> magicHeader(
-      Stream<Uint8List> stream, List<int> header,
-      {int maxLen: 1024}) {
+      Stream<Uint8List> stream, List<int> header) {
     return Transaction<Uint8List>(
-        stream,
-        MagicHeaderAndLengthByteTransformer.broadcast(
-            header: header, maxLen: maxLen));
+        stream, MagicHeaderAndLengthByteTransformer.broadcast(header: header));
   }
 
   /// Create a transaction that transforms the incoming stream into
@@ -72,14 +68,9 @@ class Transaction<T> {
   /// var c = Transaction.stringTerminated(p.inputStream, Uint8List.fromList([13, 10]));
   /// ```
   static Transaction<String> stringTerminated(
-      Stream<Uint8List> stream, Uint8List terminator,
-      {int maxLen: 1024, bool stripTerminator: true}) {
+      Stream<Uint8List> stream, Uint8List terminator) {
     return Transaction<String>(
-        stream,
-        TerminatedStringTransformer.broadcast(
-            terminator: terminator,
-            maxLen: maxLen,
-            stripTerminator: stripTerminator));
+        stream, TerminatedStringTransformer.broadcast(terminator: terminator));
   }
 
   /// Transaction Constructor, pass it the untransformed input stream and
