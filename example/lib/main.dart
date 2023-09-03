@@ -134,7 +134,7 @@ class _MyAppState extends State<MyApp> {
       ),
       body: Center(
           child: Column(children: <Widget>[
-        Text(_ports.length > 0 ? "Available Serial Ports" : "No serial devices available", style: Theme.of(context).textTheme.headline6),
+        Text(_ports.length > 0 ? "Available Serial Ports" : "No serial devices available", style: Theme.of(context).textTheme.titleLarge),
         ..._ports,
         Text('Status: $_status\n'),
         Text('info: ${_port.toString()}\n'),
@@ -160,7 +160,7 @@ class _MyAppState extends State<MyApp> {
                   },
           ),
         ),
-        Text("Result Data", style: Theme.of(context).textTheme.headline6),
+        Text("Result Data", style: Theme.of(context).textTheme.titleLarge),
         ..._serialData,
       ])),
     ));
