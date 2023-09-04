@@ -42,7 +42,7 @@ class Transaction<T> {
   /// ```
   static Transaction<Uint8List> terminated(
       Stream<Uint8List> stream, Uint8List terminator,
-      {int maxLen: 1024, bool stripTerminator: true}) {
+      {int maxLen = 1024, bool stripTerminator = true}) {
     return Transaction<Uint8List>(
         stream,
         TerminatedTransformer.broadcast(
@@ -58,7 +58,7 @@ class Transaction<T> {
   /// ```
   static Transaction<Uint8List> magicHeader(
       Stream<Uint8List> stream, List<int> header,
-      {int maxLen: 1024}) {
+      {int maxLen = 1024}) {
     return Transaction<Uint8List>(
         stream,
         MagicHeaderAndLengthByteTransformer.broadcast(
@@ -73,7 +73,7 @@ class Transaction<T> {
   /// ```
   static Transaction<String> stringTerminated(
       Stream<Uint8List> stream, Uint8List terminator,
-      {int maxLen: 1024, bool stripTerminator: true}) {
+      {int maxLen = 1024, bool stripTerminator = true}) {
     return Transaction<String>(
         stream,
         TerminatedStringTransformer.broadcast(
