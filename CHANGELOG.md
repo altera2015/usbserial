@@ -1,3 +1,7 @@
+## 0.5.1
+* Improve Java handling of null pointers.
+* Update gradle version on sample.
+
 ## 0.5.0
 * Support newer Android version.
 * Linter fixes.

@@ -8,10 +8,10 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
-import com.felhr.usbserial.UsbSerialInterface;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,23 +49,46 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_USB_ATTACHED)) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+            if (action.equals(ACTION_USB_ATTACHED)) {
                 Log.d(TAG, "ACTION_USB_ATTACHED");
-                if ( m_EventSink != null ) {
-                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    HashMap<String, Object> msg = serializeDevice(device);
-                    msg.put("event", ACTION_USB_ATTACHED);
-                    m_EventSink.success(msg);
+                if (m_EventSink != null) {
+                    UsbDevice device;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
+                    } else {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    }
+                    if (device != null) {
+                        HashMap<String, Object> msg = serializeDevice(device);
+                        msg.put("event", ACTION_USB_ATTACHED);
+                        m_EventSink.success(msg);
+                    } else {
+                        Log.e(TAG, "ACTION_USB_ATTACHED but no EXTRA_DEVICE");
+                    }
                 }
-            } else if (intent.getAction().equals(ACTION_USB_DETACHED)) {
+            } else if (action.equals(ACTION_USB_DETACHED)) {
                 Log.d(TAG, "ACTION_USB_DETACHED");
-                if ( m_EventSink != null ) {
-                    UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    HashMap<String, Object> msg = serializeDevice(device);
-                    msg.put("event", ACTION_USB_DETACHED);
-                    m_EventSink.success(msg);
+                if (m_EventSink != null) {
+                    UsbDevice device;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
+                    } else {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    }
+                    if (device != null) {
+                        HashMap<String, Object> msg = serializeDevice(device);
+                        msg.put("event", ACTION_USB_DETACHED);
+                        m_EventSink.success(msg);
+                    } else {
+                        Log.e(TAG, "ACTION_USB_DETACHED but no EXTRA_DEVICE");
+                    }
                 }
             }
+
         }
     };
 
@@ -85,8 +108,8 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
         class BRC2 extends  BroadcastReceiver {
 
-            private UsbDevice m_Device;
-            private AcquirePermissionCallback m_CB;
+            private final UsbDevice m_Device;
+            private final AcquirePermissionCallback m_CB;
 
             BRC2(UsbDevice device, AcquirePermissionCallback cb ) {
                 m_Device = device;
@@ -120,14 +143,19 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
         int flags = 0;
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags = PendingIntent.FLAG_MUTABLE;
         }
 
         PendingIntent permissionIntent = PendingIntent.getBroadcast(cw, 0, new Intent(ACTION_USB_PERMISSION), flags);
 
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        cw.registerReceiver(usbReceiver, filter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            cw.registerReceiver(usbReceiver, filter, null, null, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            cw.registerReceiver(usbReceiver, filter);
+        }
 
         m_Manager.requestPermission(device, permissionIntent);
     }
@@ -175,7 +203,6 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
             if ( allowAcquirePermission ) {
                 acquirePermissions(device, cb);
-                return;
             } else {
                 result.error(TAG, "Failed to acquire USB permission.", null);
             }
@@ -210,6 +237,7 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
             try {
                 dev.put("serialNumber", device.getSerialNumber());
             } catch  ( java.lang.SecurityException e ) {
+                Log.e(TAG, e.toString());
             }
         }
         dev.put("deviceId", device.getDeviceId());
@@ -291,9 +319,14 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
         switch (call.method) {
 
             case "create": {
-                createTyped((String)call.argument("type"), (int)call.argument("vid"),
-                        (int)call.argument("pid"), (int)call.argument("deviceId"),
-                        (int)call.argument("interface"), result);
+                String type = call.argument("type");
+                Integer vid = call.argument("vid");
+                Integer pid = call.argument("pid");
+                Integer deviceId = call.argument("deviceId");
+                Integer interfaceId = call.argument("interface");
+                if (type!=null && vid!=null && pid !=null && deviceId != null && interfaceId != null ) {
+                    createTyped(type,vid,pid,deviceId, interfaceId, result);
+                }
                 break;
             }
             case "listDevices":
