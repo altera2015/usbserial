@@ -47,6 +47,17 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
+        private UsbDevice getUsbDeviceFromIntent(Intent intent) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                return intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
+            } else {
+                // Create local variable to keep scope of deprecation suppression smallest
+                @SuppressWarnings("deprecation")
+                UsbDevice ret = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                return ret;
+            }
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -56,12 +67,7 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
             if (action.equals(ACTION_USB_ATTACHED)) {
                 Log.d(TAG, "ACTION_USB_ATTACHED");
                 if (m_EventSink != null) {
-                    UsbDevice device;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
-                    } else {
-                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    }
+                    UsbDevice device = getUsbDeviceFromIntent(intent);
                     if (device != null) {
                         HashMap<String, Object> msg = serializeDevice(device);
                         msg.put("event", ACTION_USB_ATTACHED);
@@ -73,12 +79,7 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
             } else if (action.equals(ACTION_USB_DETACHED)) {
                 Log.d(TAG, "ACTION_USB_DETACHED");
                 if (m_EventSink != null) {
-                    UsbDevice device;
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
-                    } else {
-                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    }
+                    UsbDevice device = getUsbDeviceFromIntent(intent);
                     if (device != null) {
                         HashMap<String, Object> msg = serializeDevice(device);
                         msg.put("event", ACTION_USB_DETACHED);
