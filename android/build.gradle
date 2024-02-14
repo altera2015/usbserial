@@ -31,6 +31,8 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 33
+    
+    namespace 'dev.bessems.usbserial'
 
     defaultConfig {
         minSdkVersion 16
