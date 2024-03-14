@@ -21,21 +21,6 @@ include the usbserial package at the top of your dart file.
 import 'package:usb_serial/usb_serial.dart'
 ```
 
-### IMPORTANT app\build.gradle
-
-Edit android\app\build.gradle and add
-
-```
-    compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-```
-
-to the 'android' object, see [build.grade](https://raw.githubusercontent.com/altera2015/usbserial/master/example/android/app/build.gradle)
-from the example project for a template on how to do this. Without this you'll get a bunch or Java
-errors.
-
 ### Optional
 
 Add
