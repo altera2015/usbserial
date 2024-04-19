@@ -105,6 +105,7 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
         void onSuccess(UsbDevice device);
         void onFailed(UsbDevice device);
     }
+    @SuppressLint("PrivateApi")
     private void acquirePermissions(UsbDevice device, AcquirePermissionCallback cb) {
 
         class BRC2 extends  BroadcastReceiver {
@@ -148,7 +149,19 @@ public class UsbSerialPlugin implements FlutterPlugin, MethodCallHandler, EventC
             flags = PendingIntent.FLAG_MUTABLE;
         }
 
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(cw, 0, new Intent(ACTION_USB_PERMISSION), flags);
+        Intent intent = new Intent(ACTION_USB_PERMISSION);
+
+        Class<?> activityThread = null;
+        try {
+            activityThread = Class.forName("android.app.ActivityThread");
+            Method method = activityThread.getDeclaredMethod("currentPackageName");
+            String appPackageName = (String) method.invoke(activityThread);
+            intent.setPackage(appPackageName);
+        } catch (Exception e) {
+            // Not too important to throw anything
+        }
+
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(cw, 0, intent, flags);
 
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 
