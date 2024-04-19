@@ -1,5 +1,6 @@
 package dev.bessems.usbserial;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.util.Log;
 
 import com.felhr.usbserial.UsbSerialDevice;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
