@@ -385,3 +385,66 @@ class MagicHeaderAndLengthByteTransformer
     _controller.close();
   }
 }
+
+class MagicHeaderFixedLengthByteTransformer
+    extends MagicHeaderAndLengthByteTransformer {
+  final int len;
+
+  MagicHeaderFixedLengthByteTransformer(
+      {bool sync = false,
+      bool? cancelOnError,
+      List<int?>? header,
+      required this.len,
+      int maxLen = 1024,
+      Duration clearTimeout = const Duration(seconds: 1)})
+      : super(
+            sync: sync,
+            cancelOnError: cancelOnError,
+            header: header,
+            maxLen: maxLen,
+            clearTimeout: clearTimeout);
+
+  MagicHeaderFixedLengthByteTransformer.broadcast(
+      {bool sync = false,
+      bool? cancelOnError,
+      List<int?>? header,
+      required this.len,
+      int maxLen = 1024,
+      Duration clearTimeout = const Duration(seconds: 1)})
+      : super.broadcast(
+            sync: sync,
+            cancelOnError: cancelOnError,
+            header: header,
+            maxLen: maxLen,
+            clearTimeout: clearTimeout);
+
+  @override
+  void onData(Uint8List data) {
+    _dataSinceLastTick = true;
+    if (_partial.length > maxLen) {
+      _partial = _partial.sublist(_partial.length - maxLen);
+    }
+
+    _partial.addAll(data);
+
+    while (_partial.length > 0) {
+      int index = wildcardFind(header, _partial);
+      if (index < 0) {
+        return;
+      }
+
+      if (index > 0) {
+        _partial = _partial.sublist(index);
+      }
+
+      if (_partial.length < header!.length + len + 1) {
+        // not completely arrived yet.
+        return;
+      }
+
+      _controller
+          .add(Uint8List.fromList(_partial.sublist(0, len + header!.length + 1)));
+      _partial = _partial.sublist(len + header!.length + 1);
+    }
+  }
+}
