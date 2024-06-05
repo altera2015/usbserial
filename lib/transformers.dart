@@ -342,7 +342,7 @@ class MagicHeaderAndLengthByteTransformer
       }
 
       // int len = _partial[header!.length];
-      int len = 75;
+      int len = 74;
       if (_partial.length < len + header!.length + 1) {
         // not completely arrived yet.
         return;
