@@ -437,14 +437,14 @@ class MagicHeaderFixedLengthByteTransformer
         _partial = _partial.sublist(index);
       }
 
-      if (_partial.length < header!.length + len) {
+      if (_partial.length < header!.length + len + 1) {
         // not completely arrived yet.
         return;
       }
 
       _controller
-          .add(Uint8List.fromList(_partial.sublist(0, len + header!.length)));
-      _partial = _partial.sublist(len + header!.length);
+          .add(Uint8List.fromList(_partial.sublist(0, len + header!.length + 1)));
+      _partial = _partial.sublist(len + header!.length + 1);
     }
   }
 }
