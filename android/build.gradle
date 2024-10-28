@@ -49,6 +49,7 @@ android {
 }
 
 dependencies {
+    // TODO: Temporary workaround, need to switch to stable release tag when UsbSerial builds successfully.
     implementation('com.github.felHR85:UsbSerial:7ad6c9f6') {
         artifact {
             classifier = 'release'
