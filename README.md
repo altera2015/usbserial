@@ -1,3 +1,7 @@
+# Looking for maintainer
+
+https://github.com/altera2015/usbserial/issues/121
+
 [![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Flutter](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml/badge.svg)](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml)
 
 # usb_serial
