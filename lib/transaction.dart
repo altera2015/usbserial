@@ -65,6 +65,20 @@ class Transaction<T> {
             header: header, maxLen: maxLen));
   }
 
+  /// Create a transaction that uses MagicHeaderFixedLengthByteTransformer
+  ///
+  /// ```dart
+  /// Transaction.magicHeaderFixedLength(p.inputStream, Uint8List.fromList([65,65,65]), len: 10); // expects magic header AAA and fixed length 10.
+  /// ```
+  static Transaction<Uint8List> magicHeaderFixedLength(
+      Stream<Uint8List> stream, List<int> header, int len,
+      {int maxLen = 1024}) {
+    return Transaction<Uint8List>(
+        stream,
+        MagicHeaderFixedLengthByteTransformer.broadcast(
+            header: header, len: len, maxLen: maxLen));
+  }
+
   /// Create a transaction that transforms the incoming stream into
   /// events delimited by 'terminator', returning Strings.
   ///
