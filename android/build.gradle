@@ -4,18 +4,18 @@ version '1.0'
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:8.11.1'
     }
 }
 
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven { url "https://jitpack.io" }
     }
 
@@ -30,7 +30,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdk 36
     
     namespace 'dev.bessems.usbserial'
 
@@ -38,12 +38,12 @@ android {
         minSdkVersion 17
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    lintOptions {
+    lint {
         disable 'InvalidPackage'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
 }

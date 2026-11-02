@@ -9,6 +9,8 @@
 * The input stream ends (onDone) when the device is unplugged; serial errors are returned as
   PlatformException instead of crashing the app.
 * minSdk raised to 17 (required by usb-serial-for-android).
+* Android build: `jcenter()` replaced by `mavenCentral()` (Gradle 9 removed it), compileSdk 36,
+  AGP 8.11.1, Java 11, `lint {}` DSL. Builds on the current Flutter template (AGP 9.1, Gradle 9.3.1).
 
 ## 0.5.1
 * Improve Java handling of null pointers.
