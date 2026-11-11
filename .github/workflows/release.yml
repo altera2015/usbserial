@@ -1,0 +1,133 @@
+name: Release
+
+# Runs when a version tag (e.g. v0.6.0) is pushed. See .github/RELEASING.md.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify tag, version & package
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Tag must point to a commit on master
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "::error::Tag $GITHUB_REF_NAME ($GITHUB_SHA) is not on master."
+            exit 1
+          fi
+
+      - name: Tag must match pubspec version
+        id: version
+        run: |
+          version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | tr -d "\"' \r")"
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match pubspec.yaml version $version (expected v$version)."
+            exit 1
+          fi
+          echo "version=$version" >>"$GITHUB_OUTPUT"
+
+      - name: CHANGELOG must have a section for this version
+        run: |
+          if ! grep -qx "## ${{ steps.version.outputs.version }}" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## ${{ steps.version.outputs.version }}' section."
+            exit 1
+          fi
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter pub get --directory example
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Test
+        run: flutter test
+
+      - name: Validate package (pub publish --dry-run)
+        run: flutter pub publish --dry-run
+
+  github-release:
+    name: Create GitHub release
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Extract release notes from CHANGELOG
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          awk -v header="## $VERSION" '
+            $0 == header { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md >release-notes.md
+          cat release-notes.md
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          prerelease=()
+          if [[ "$VERSION" == *-* ]]; then prerelease=(--prerelease); fi
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            # Re-run: keep the existing release, refresh its notes.
+            gh release edit "$GITHUB_REF_NAME" --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag \
+              --title "v$VERSION" --notes-file release-notes.md "${prerelease[@]}"
+          fi
+
+  publish-pub-dev:
+    name: Publish to pub.dev
+    needs: verify
+    runs-on: ubuntu-latest
+    # Soft-fail until automated publishing is enabled for this repository on
+    # pub.dev (see .github/RELEASING.md). Once it is, re-run this job from the
+    # tag's workflow run to publish.
+    continue-on-error: true
+    # Lets the pub.dev admin require this environment, and lets repo admins
+    # add protection rules (e.g. required reviewers) to publishing.
+    environment: pub.dev
+    permissions:
+      contents: read
+      id-token: write # OIDC token that pub.dev exchanges for publishing rights
+    steps:
+      - uses: actions/checkout@v7
+
+      # Configures the pub.dev OIDC credentials (needs id-token: write).
+      - uses: dart-lang/setup-dart@v1
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Publish
+        run: flutter pub publish --force

@@ -1,4 +1,4 @@
-## Unreleased
+## 0.6.0
 * Android: confirmed and documented 16 KB memory page size support (#130).
 * Android: switched the USB serial drivers from felHR85/UsbSerial 6.1.0 to
   mik3y/usb-serial-for-android 3.12.0 (#134, thanks @ravisvf). Adds the Prolific PL2303
@@ -24,6 +24,11 @@
 * Adopted `flutter_lints` and fixed all findings. No public API renames; the
   `stripTerminator` fields of the terminated transformers are now typed `bool` (was `dynamic`).
 * Added platform-channel contract tests for `UsbSerial`, `UsbDevice` and `UsbPort`.
+
+## 0.5.2
+* Android 14 compatibility improvements
+* Gradle build fixes
+* Updated readme
 
 ## 0.5.1
 * Improve Java handling of null pointers.
