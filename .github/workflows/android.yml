@@ -11,6 +11,7 @@ on:
       - "pubspec.yaml"
       - "example/pubspec.yaml"
       - "tool/check_16kb_alignment.sh"
+      - "tool/update_vendored_usb_serial.sh"
       - ".github/workflows/android.yml"
   pull_request:
     branches: [master]
@@ -22,6 +23,7 @@ on:
       - "pubspec.yaml"
       - "example/pubspec.yaml"
       - "tool/check_16kb_alignment.sh"
+      - "tool/update_vendored_usb_serial.sh"
       - ".github/workflows/android.yml"
   workflow_dispatch:
 
@@ -38,6 +40,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # The drivers under android/.../vendored must be exactly upstream
+      # usb-serial-for-android at the pinned VERSION (plus the package rename).
+      - name: Verify vendored usb-serial-for-android
+        run: tool/update_vendored_usb_serial.sh --check
 
       - uses: actions/setup-java@v6
         with:

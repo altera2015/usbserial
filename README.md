@@ -25,26 +25,9 @@ include the usbserial package at the top of your dart file.
 import 'package:usb_serial/usb_serial.dart'
 ```
 
-### Add the JitPack repository
-
-The Android side depends on [felHR85/UsbSerial](https://github.com/felHR85/UsbSerial),
-which is only published on [JitPack](https://jitpack.io). Gradle resolves your app's
-dependencies using your app's repositories, so add JitPack to `android/build.gradle.kts`
-(or `android/build.gradle`) in your app:
-
-```kotlin
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-    }
-}
-```
-
-If your project declares repositories centrally in `android/settings.gradle(.kts)`
-(`dependencyResolutionManagement`), add the JitPack line there instead. Without it the
-build fails with `Could not find com.github.felHR85:UsbSerial:6.1.0`.
+No extra Gradle repositories are needed: the Android USB serial drivers are bundled with the
+plugin (see [Dependencies](#dependencies)). If you added JitPack to your app only for an older
+`usb_serial` release, you can remove it.
 
 ### Optional
 
@@ -211,7 +194,7 @@ code. Only if you created your own Transformer/Transactions.
 
 ### Does this plugin support Android 16 KB memory page sizes?
 
-Yes. The plugin and depdencies are Java libraries and do not contain native code.
+Yes. The plugin and its bundled drivers are Java libraries and do not contain native code.
 
 If Play Console flags your app, the offending library comes from another plugin or package.
 You can try and find where the problem is by doing the following:
@@ -229,6 +212,13 @@ https://github.com/altera2015/usbserial/issues/38
 
 ## Dependencies
 
-This library depends on:
+The Android USB serial drivers (CDC-ACM, FTDI, CP210x, CH34x, Prolific PL2303 including the
+G/HXN family, and more) are vendored from
+[mik3y/usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android) (MIT license),
+renamed to `dev.bessems.usbserial.vendored` so they never clash with an app that also uses
+that library directly. The bundled version is in
+[`android/src/main/java/dev/bessems/usbserial/vendored/VERSION`](android/src/main/java/dev/bessems/usbserial/vendored/VERSION);
+update it with `tool/update_vendored_usb_serial.sh <release tag>`. CI verifies the vendored
+code is unmodified upstream source.
 
-https://github.com/felHR85/UsbSerial
+Versions up to 0.5.1 used [felHR85/UsbSerial](https://github.com/felHR85/UsbSerial).
