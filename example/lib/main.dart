@@ -1,30 +1,33 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   UsbPort? _port;
   String _status = "Idle";
   List<Widget> _ports = [];
-  List<Widget> _serialData = [];
+  final List<Widget> _serialData = [];
 
   StreamSubscription<String>? _subscription;
+  StreamSubscription<UsbEvent>? _usbEvents;
   Transaction<String>? _transaction;
   UsbDevice? _device;
 
-  TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
 
-  Future<bool> _connectTo(device) async {
+  Future<bool> _connectTo(UsbDevice? device) async {
     _serialData.clear();
 
     if (_subscription != null) {
@@ -61,9 +64,11 @@ class _MyAppState extends State<MyApp> {
 
     await _port!.setDTR(true);
     await _port!.setRTS(true);
-    await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+    await _port!.setPortParameters(
+        115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
 
-    _transaction = Transaction.stringTerminated(_port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
+    _transaction = Transaction.stringTerminated(
+        _port!.inputStream as Stream<Uint8List>, Uint8List.fromList([13, 10]));
 
     _subscription = _transaction!.stream.listen((String line) {
       setState(() {
@@ -83,16 +88,19 @@ class _MyAppState extends State<MyApp> {
   void _getPorts() async {
     _ports = [];
     List<UsbDevice> devices = await UsbSerial.listDevices();
+    if (!mounted) {
+      return;
+    }
     if (!devices.contains(_device)) {
       _connectTo(null);
     }
-    print(devices);
+    debugPrint(devices.toString());
 
-    devices.forEach((device) {
+    for (var device in devices) {
       _ports.add(ListTile(
           leading: Icon(Icons.usb),
-          title: Text(device.productName!),
-          subtitle: Text(device.manufacturerName!),
+          title: Text(device.productName ?? 'Unknown device'),
+          subtitle: Text(device.manufacturerName ?? ''),
           trailing: ElevatedButton(
             child: Text(_device == device ? "Disconnect" : "Connect"),
             onPressed: () {
@@ -101,18 +109,16 @@ class _MyAppState extends State<MyApp> {
               });
             },
           )));
-    });
+    }
 
-    setState(() {
-      print(_ports);
-    });
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
 
-    UsbSerial.usbEventStream!.listen((UsbEvent event) {
+    _usbEvents = UsbSerial.usbEventStream!.listen((UsbEvent event) {
       _getPorts();
     });
 
@@ -121,8 +127,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    _usbEvents?.cancel();
+    _subscription?.cancel();
+    _transaction?.dispose();
+    _port?.close();
+    _textController.dispose();
     super.dispose();
-    _connectTo(null);
   }
 
   @override
@@ -134,7 +144,11 @@ class _MyAppState extends State<MyApp> {
       ),
       body: Center(
           child: Column(children: <Widget>[
-        Text(_ports.length > 0 ? "Available Serial Ports" : "No serial devices available", style: Theme.of(context).textTheme.titleLarge),
+        Text(
+            _ports.isNotEmpty
+                ? "Available Serial Ports"
+                : "No serial devices available",
+            style: Theme.of(context).textTheme.titleLarge),
         ..._ports,
         Text('Status: $_status\n'),
         Text('info: ${_port.toString()}\n'),
@@ -147,17 +161,17 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           trailing: ElevatedButton(
-            child: Text("Send"),
             onPressed: _port == null
                 ? null
                 : () async {
                     if (_port == null) {
                       return;
                     }
-                    String data = _textController.text + "\r\n";
+                    String data = "${_textController.text}\r\n";
                     await _port!.write(Uint8List.fromList(data.codeUnits));
                     _textController.text = "";
                   },
+            child: Text("Send"),
           ),
         ),
         Text("Result Data", style: Theme.of(context).textTheme.titleLarge),

@@ -1,22 +1,22 @@
-group 'dev.bessems.usbserial'
-version '1.0'
+group = 'dev.bessems.usbserial'
+version = '1.0'
 
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 36
-    
-    namespace 'dev.bessems.usbserial'
+    compileSdk = 36
+
+    namespace = 'dev.bessems.usbserial'
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk = 21
     }
-    lintOptions {
+    lint {
         disable 'InvalidPackage'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
 }
@@ -24,7 +24,7 @@ android {
 repositories {
     google()
     mavenCentral()
-    maven { url "https://jitpack.io" }
+    maven { url = "https://jitpack.io" }
 }
 
 dependencies {

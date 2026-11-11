@@ -1,0 +1,71 @@
+name: Android
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "android/**"
+      - "lib/**"
+      - "example/android/**"
+      - "example/lib/**"
+      - "pubspec.yaml"
+      - "example/pubspec.yaml"
+      - "tool/check_16kb_alignment.sh"
+      - ".github/workflows/android.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "android/**"
+      - "lib/**"
+      - "example/android/**"
+      - "example/lib/**"
+      - "pubspec.yaml"
+      - "example/pubspec.yaml"
+      - "tool/check_16kb_alignment.sh"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-example:
+    name: Build example APK & check 16 KB page size support
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+      - name: Build release APK
+        working-directory: example
+        run: flutter build apk --release
+
+      # Google Play requires 16 KB page size support for apps targeting
+      # Android 15+. usb_serial ships no native code; this verifies the
+      # complete example app (Flutter engine + plugin) stays compliant.
+      - name: Check 16 KB page size alignment
+        run: tool/check_16kb_alignment.sh example/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload example APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: usb_serial-example-apk
+          path: example/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7

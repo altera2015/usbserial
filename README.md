@@ -2,7 +2,7 @@
 
 I'm looking for a new maintainer for this project, please indicate your interest here: https://github.com/altera2015/usbserial/issues/121
 
-[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Flutter](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml/badge.svg)](https://github.com/altera2015/usbserial/actions/workflows/flutter.yml)
+[![Pub](https://img.shields.io/pub/v/usb_serial.svg)](https://pub.dartlang.org/packages/usb_serial) [![Dart](https://github.com/altera2015/usbserial/actions/workflows/dart.yml/badge.svg)](https://github.com/altera2015/usbserial/actions/workflows/dart.yml) [![Android](https://github.com/altera2015/usbserial/actions/workflows/android.yml/badge.svg)](https://github.com/altera2015/usbserial/actions/workflows/android.yml)
 
 # usb_serial
 
@@ -24,6 +24,27 @@ include the usbserial package at the top of your dart file.
 ```dart
 import 'package:usb_serial/usb_serial.dart'
 ```
+
+### Add the JitPack repository
+
+The Android side depends on [felHR85/UsbSerial](https://github.com/felHR85/UsbSerial),
+which is only published on [JitPack](https://jitpack.io). Gradle resolves your app's
+dependencies using your app's repositories, so add JitPack to `android/build.gradle.kts`
+(or `android/build.gradle`) in your app:
+
+```kotlin
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+If your project declares repositories centrally in `android/settings.gradle(.kts)`
+(`dependencyResolutionManagement`), add the JitPack line there instead. Without it the
+build fails with `Could not find com.github.felHR85:UsbSerial:6.1.0`.
 
 ### Optional
 
@@ -188,6 +209,19 @@ code. Only if you created your own Transformer/Transactions.
 
 ## FAQ
 
+### Does this plugin support Android 16 KB memory page sizes?
+
+Yes. The plugin and depdencies are Java libraries and do not contain native code.
+
+If Play Console flags your app, the offending library comes from another plugin or package.
+You can try and find where the problem is by doing the following:
+
+* build with a current Flutter stable release and Android Gradle Plugin 8.5.1 or newer, which
+  zip-align uncompressed native libraries to 16 KB;
+* run `tool/check_16kb_alignment.sh path/to/app-release.apk` (from this repository) on your
+  APK, or open the APK in Android Studio's APK Analyzer, to see which `.so` file is not aligned;
+* update or replace the plugin or SDK that ships that library.
+
 ### Always ask permission to use USB port
 https://github.com/altera2015/usbserial/issues/49
 https://github.com/altera2015/usbserial/issues/38
@@ -198,5 +232,3 @@ https://github.com/altera2015/usbserial/issues/38
 This library depends on:
 
 https://github.com/felHR85/UsbSerial
-
-
