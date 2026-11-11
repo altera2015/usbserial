@@ -1,6 +1,19 @@
 ## Unreleased
 * Android: confirmed and documented 16 KB memory page size support (#130).
-* Android: document that apps must add the JitPack repository (temporary, pending pr #134).
+* Android: switched the USB serial drivers from felHR85/UsbSerial 6.1.0 to
+  mik3y/usb-serial-for-android 3.12.0 (#134, thanks @ravisvf). Adds the Prolific PL2303
+  G/HXN family (e.g. PL2303GC 067b:23a3) and fixes DTR/RTS handling. The Dart API and the
+  `create` `type` strings are unchanged.
+* Android: the drivers are vendored into the plugin (package `dev.bessems.usbserial.vendored`),
+  so apps no longer need the JitPack repository. `tool/update_vendored_usb_serial.sh` updates
+  them and CI checks they match upstream.
+* Android: port parameters, DTR, RTS and flow control set before `open()` are applied when
+  the port opens; the input stream ends (onDone) when the device is unplugged; serial errors
+  are returned as `PlatformException` instead of crashing the app.
+* Android: `write` no longer blocks the UI thread; its timeout scales with the baud rate.
+* Android: XON/XOFF flow control on FTDI chips uses inline XON/XOFF with the characters
+  filtered from the input stream.
+* Android: `create`'s `interface` argument now selects the port index on multi-port devices.
 * Android: modern Gradle DSL in the plugin (`compileSdk =`, `lint {}`, assignment syntax)
   and removed the deprecated `package` attribute from the plugin manifest.
 * Example app migrated to the current Flutter Android template (Gradle Kotlin DSL,

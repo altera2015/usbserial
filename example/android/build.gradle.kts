@@ -2,9 +2,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // usb_serial depends on com.github.felHR85:UsbSerial, which is only
-        // published on JitPack. Apps using usb_serial must add this too.
-        maven { url = uri("https://jitpack.io") }
     }
 }
 
