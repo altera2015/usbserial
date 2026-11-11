@@ -1,3 +1,17 @@
+## Unreleased
+* Android: confirmed and documented 16 KB memory page size support (#130).
+* Android: document that apps must add the JitPack repository (temporary, pending pr #134).
+* Android: modern Gradle DSL in the plugin (`compileSdk =`, `lint {}`, assignment syntax)
+  and removed the deprecated `package` attribute from the plugin manifest.
+* Example app migrated to the current Flutter Android template (Gradle Kotlin DSL,
+  declarative plugins, AGP 9) and fixed `setState()` being called after `dispose()`.
+* CI: new Dart workflow (format, `flutter analyze --fatal-infos`, tests on stable and beta)
+  and Android workflow, both scoped to relevant paths; latest action versions; Dependabot
+  for GitHub Actions and pub (#135).
+* Adopted `flutter_lints` and fixed all findings. No public API renames; the
+  `stripTerminator` fields of the terminated transformers are now typed `bool` (was `dynamic`).
+* Added platform-channel contract tests for `UsbSerial`, `UsbDevice` and `UsbPort`.
+
 ## 0.5.1
 * Improve Java handling of null pointers.
 * Update gradle version on sample.

@@ -1,19 +1,25 @@
-# https://www.dartlang.org/guides/language/analysis-options
-# Source of linter options:
-# http://dart-lang.github.io/linter/lints/options/options.html
+# https://dart.dev/tools/analysis
+include: package:flutter_lints/flutter.yaml
+
 linter:
   rules:
-    - hash_and_equals
-    - valid_regexps
-    - always_declare_return_types
-    - empty_constructor_bodies
-    - annotate_overrides
-    - avoid_init_to_null
-    - one_member_abstracts
-    - slash_for_doc_comments
-    - unnecessary_brace_in_string_interps
+    hash_and_equals: true
+    valid_regexps: true
+    always_declare_return_types: true
+    empty_constructor_bodies: true
+    annotate_overrides: true
+    avoid_init_to_null: true
+    one_member_abstracts: true
+    slash_for_doc_comments: true
+    unnecessary_brace_in_string_interps: true
+    # Public API constants (UsbPort.DATABITS_8, UsbSerial.CDC,
+    # UsbEvent.ACTION_USB_ATTACHED, ...) predate this rule; renaming them
+    # would break every consumer.
+    constant_identifier_names: false
 
 analyzer:
   exclude:
-    - test/test.dart
-    - test/echo_port.dart
+    - build/**
+    - example/build/**
+    - android/**
+    - ios/**

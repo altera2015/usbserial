@@ -32,7 +32,7 @@ import 'types.dart';
 class Transaction<T> {
   late Stream<T> stream;
   late StreamQueue<T> _queue;
-  DisposableStreamTransformer? _transformer;
+  final DisposableStreamTransformer? _transformer;
 
   /// Create a transaction that transforms the incoming stream into
   /// events delimited by 'terminator'.
@@ -86,7 +86,7 @@ class Transaction<T> {
   /// the transformer to work on the stream.
   Transaction(Stream<Uint8List> stream,
       DisposableStreamTransformer<Uint8List, T> transformer)
-      : this.stream = stream.transform(transformer),
+      : stream = stream.transform(transformer),
         _transformer = transformer {
     _queue = StreamQueue<T>(this.stream);
   }

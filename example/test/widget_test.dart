@@ -1,27 +1,43 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-// import 'package:example/main.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:usb_serial_example/main.dart';
 
 void main() {
-  // testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-  //   // Build our app and trigger a frame.
-  //   await tester.pumpWidget(MyApp());
-  //
-  //   // Verify that our counter starts at 0.
-  //   expect(find.text('0'), findsOneWidget);
-  //   expect(find.text('1'), findsNothing);
-  //
-  //   // Tap the '+' icon and trigger a frame.
-  //   await tester.tap(find.byIcon(Icons.add));
-  //   await tester.pump();
-  //
-  //   // Verify that our counter has incremented.
-  //   expect(find.text('0'), findsNothing);
-  //   expect(find.text('1'), findsOneWidget);
-  // });
+  testWidgets('renders the device list from the platform channel',
+      (WidgetTester tester) async {
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(const MethodChannel('usb_serial'),
+        (call) async {
+      if (call.method == 'listDevices') {
+        return [
+          {
+            'deviceName': '/dev/bus/usb/001/002',
+            'vid': 0x0403,
+            'pid': 0x6001,
+            'manufacturerName': 'FTDI',
+            'productName': 'FT232R USB UART',
+            'deviceId': 1002,
+          }
+        ];
+      }
+      return null;
+    });
+    messenger.setMockStreamHandler(const EventChannel('usb_serial/usb_events'),
+        MockStreamHandler.inline(onListen: (args, sink) {}));
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(
+          const MethodChannel('usb_serial'), null);
+      messenger.setMockStreamHandler(
+          const EventChannel('usb_serial/usb_events'), null);
+    });
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Available Serial Ports'), findsOneWidget);
+    expect(find.text('FT232R USB UART'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Connect'), findsOneWidget);
+    expect(find.textContaining('Status: '), findsOneWidget);
+  });
 }

@@ -7,6 +7,10 @@ pubspec.lock
 # Local configuration file (sdk path, etc)
 local.properties
 
+# Flutter / Gradle build output
+/build/
+/example/build/
+
 # Android Studio
 /*/build/
 /*/local.properties

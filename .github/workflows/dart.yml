@@ -1,0 +1,76 @@
+name: Dart
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "example/lib/**"
+      - "example/test/**"
+      - "pubspec.yaml"
+      - "example/pubspec.yaml"
+      - "analysis_options.yaml"
+      - "example/analysis_options.yaml"
+      - ".github/workflows/dart.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "example/lib/**"
+      - "example/test/**"
+      - "pubspec.yaml"
+      - "example/pubspec.yaml"
+      - "analysis_options.yaml"
+      - "example/analysis_options.yaml"
+      - ".github/workflows/dart.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-test:
+    name: Format, analyze & test (${{ matrix.channel }})
+    runs-on: ubuntu-latest
+    # beta is an early warning for upcoming SDK changes, not a gate.
+    continue-on-error: ${{ matrix.channel == 'beta' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        channel: [stable, beta]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.channel }}
+          cache: true
+
+      - run: flutter --version
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter pub get --directory example
+
+      # Formatter output can differ between SDK releases, so only the
+      # stable channel is authoritative.
+      - name: Verify formatting
+        if: matrix.channel == 'stable'
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze (plugin + example)
+        run: flutter analyze --fatal-infos
+
+      - name: Test plugin
+        run: flutter test
+
+      - name: Test example
+        working-directory: example
+        run: flutter test
